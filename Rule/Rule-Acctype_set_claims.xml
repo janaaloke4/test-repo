@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="accType_set_claims" type="LinkAttribute">
+  <Description>This rule is used when promoting account attributes from Links during aggregation.</Description>
+  <Signature returnType="Object"/>
+  <Source>if(link.getAttribute("acount_type").equals("secondary"))
+return "S";
+else
+return "P";</Source>
+</Rule>

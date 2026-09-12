@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="EmployeeCenter_buildmapRule" type="BuildMap">
+  <Description>This rule is used by the delimited file connector to build a map representation of the delimited data.</Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log" type="org.apache.commons.logging.Log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context" type="sailpoint.api.SailPointContext">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          The application whose data file is being processed.
+        </Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>
+          The Schema currently in use.
+        </Description>
+      </Argument>
+      <Argument name="state">
+        <Description>
+          A Map containing state information.
+        </Description>
+      </Argument>
+      <Argument name="record">
+        <Description>
+          A List of data tokens parsed from the current line of the data file.
+        </Description>
+      </Argument>
+      <Argument name="cols">
+        <Description>
+          A List of the columns to use.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="map">
+        <Description>
+          A Map of the resource object assembled from the data.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>import sailpoint.connector.DelimitedFileConnector;
+	import java.text.SimpleDateFormat;
+  import java.time.*;
+  import java.util.*;
+	 map = DelimitedFileConnector.defaultBuildMap(cols, record);
+  
+  String endDate= map.get("endDate");
+  if(endDate==null)
+  {
+  	map.put("IIQDisabled",false);
+  }
+  else
+  {
+      SimpleDateFormat sourceFormat = new SimpleDateFormat("dd-MM-yyyy"); 
+      Date end_date = sourceFormat.parse(endDate);
+      // getting current date
+      LocalDate currentDate= LocalDate.now();
+			SimpleDateFormat sourceFormat1 = new SimpleDateFormat("yyyy-MM-dd");
+      Date today= sourceFormat1.parse(currentDate.toString());
+     //System.out.println("## end date"+end_date +"  ## Today"+today );
+      if(end_date.before(today))  // date expired
+      {
+				map.put("IIQDisabled",true);
+      }
+    else
+      map.put("IIQDisabled",false);
+  }
+  
+  return map;</Source>
+</Rule>

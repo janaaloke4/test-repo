@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="sky-createJiraTicket" type="Correlation">
+  <Description>
+    Import template-defined Roles from a CSV file.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+
+  import java.io.*;
+  import java.net.*;
+  import javax.json.*;
+  import org.json.*;
+  import java.net.HttpURLConnection;
+  import javax.net.ssl.HttpsURLConnection;
+  import java.util.Base64;
+  import java.net.URL;
+  
+      try {
+        URL jiraREST_URL = new URL("http://localhost:8084/rest/api/2/issue/");
+      
+        HttpURLConnection conn =(HttpURLConnection) jiraREST_URL.openConnection();
+       
+        conn.setDoOutput(true);
+       // conn.setDoInput(true);
+			 	String myApi="{\"fields\":{\"project\":{\"key\": \"SKYV\"},\"summary\": \"Creating ticket from Sailpoint\",\"description\": \"Creating of an issue using project keys and issue type names using the REST API\",\"reporter\": {\"name\": \"root\"},\"issuetype\":{\"name\":\"Task\"}}}";
+        // String encodedData = URLEncoder.encode(getJSON_Body(),"UTF-8");
+        //String encodedData = URLEncoder.encode(myApi,"UTF-8");
+
+        System.out.println("getJSON_Body(): " + conn);
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Authorization", "Basic " + Base64.getEncoder().encodeToString("root:root".getBytes()));
+        conn.setRequestProperty("Content-Type", "application/json");
+        try{
+        		OutputStream os =conn.getOutputStream();
+          byte[] input = myApi.getBytes("utf-8");
+          //os.write(input,0,input.length);
+          os.write(input);
+        }
+        catch (IOException e){
+          System.out.println("--------------------"+e.getMessage());
+        }
+     
+        int resCode=conn.getResponseCode();
+        if(resCode== conn.HTTP_CREATED)
+        {
+        	System.out.println("Jira Ticket Created succesufully" );
+        }
+        else
+          	System.out.println("Connection Issue "+resCode);
+      } catch (MalformedURLException e) {
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+
+   
+  
+
+  </Source>
+</Rule>

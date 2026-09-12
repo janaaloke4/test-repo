@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="SKY EmployeeCenter_preIterate Rule" type="PreIterate">
+  <Description>This rule is called before the connector processes the data in a file.</Description>
+  <Signature returnType="void">
+    <Inputs>
+      <Argument name="log" type="org.apache.commons.logging.Log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context" type="sailpoint.api.SailPointContext">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          Application being iterated.
+        </Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>
+          Schema representing the data being iterated.
+        </Description>
+      </Argument>
+      <Argument name="stats">
+        <Description>
+          A map passed by the connector of the stats for the file about to be iterated.
+          Contains keys:
+            fileName : (String) filename of the file about to be processed
+            absolutePath : (String) absolute filename
+            length : (Long) length in bytes
+            lastModified : (Long) last time the file was updated Java GMT
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+  import sailpoint.object.Application;
+  import java.io.File;
+  
+  Application application=context.getObjectByName(Application.class,"Employee Center");
+  String csvFileName=application.getAttributeValue("file");
+  log.error("file name: "+csvFileName);
+  
+  File newFile=new File(csvFileName);
+  log.error("file name in rule: "+fileName);
+  </Source>
+</Rule>

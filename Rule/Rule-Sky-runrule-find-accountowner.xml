@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Sky-RunRule-Find-AccountOwner">
+  <Description>A task that can be used to run an arbitrary rule to find account owner details for specific application</Description>
+  <Source>
+  import sailpoint.object.TaskDefinition;
+  import sailpoint.object.TaskResult;
+  import sailpoint.object.Application;
+  import sailpoint.object.Link;
+  import sailpoint.object.Identity;
+  import java.util.*;
+  
+  String taskName="Sky-Find-accountOwner";
+  TaskDefinition taskDef=context.getObjectByName(TaskDefinition.class,taskName);
+  TaskResult taskRes=context.getObjectByName(TaskResult.class,taskName);
+  
+  // retriving data from the taskDefination
+  String appName=taskDef.getString("appName");
+  String accountName=taskDef.getString("accountDisplayName");
+  
+  if(taskName!=null &amp;&amp; taskDef!=null)
+  {
+  	if(true)
+    {
+    	taskRes.setAttribute("info","Please find the below Owner details for the requested account");
+      taskRes.setAttribute("Owner","Aloke");
+      context.saveObject(taskRes);
+      context.commitTransaction();
+    }
+    else
+    {
+    
+    }
+  }
+
+  log.error("Task Rule executed successfully ......................");
+  
+  </Source>
+</Rule>

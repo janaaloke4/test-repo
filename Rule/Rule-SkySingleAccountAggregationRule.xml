@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="SKY Single account aggregation rule">
+  <Description>
+    The default arguments included with all calls to sailpoint.server.InternalContext.runRule()
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+  	 import sailpoint.connector.Connector;
+     import sailpoint.connector.ConnectorFactory;
+  	 import sailpoint.object.Application;
+  	 import sailpoint.object.ResourceObject;
+  	 import sailpoint.object.Rule;
+    import java.util.*;
+    import sailpoint.object.Attributes;
+  
+  
+  String appName="Sky - LDAP";
+  String accountName="cn=A0389,ou=Contractor-External,dc=skyview,dc=com";
+  
+  Application appObj= context.getObjectByName(Application.class, appName);
+  Connector connector = sailpoint.connector.ConnectorFactory.getConnector(appObj,null);
+  
+  ResourceObject resObj;
+  log.error("Before rejObj");
+  try{
+  	
+    	resObj=connector.getObject("account",accountName, null);
+    return resObj.toXml();
+  }
+  catch(Exception e)
+  {
+  	log.error("Exception"+ e);
+  }
+  
+  // In case of any customization rule
+  Rule custRule=	appObj.getCustomizationRule();
+  if(custRule !=null)
+  {
+  
+    // need to pass the require argument for customization rule
+    HashMap ruleArgs = new HashMap();
+    
+    ruleArgs.put("log",log);
+     ruleArgs.put("context",context);
+     ruleArgs.put("object",resObj);
+     ruleArgs.put("application",appObj);
+     ruleArgs.put("connector",connector);
+    ruleArgs.put("state",new HashMap());
+    
+    // Calling the customization rule for the resourceObject, and we will get a resourceObject as a return from the cust rule
+    ResourceObject resObjRule = context.runRule(custRule,ruleArgs,null);
+    if(resObjRule !=null)
+    {
+    	resObj=resObjRule;
+      log.error("Got post-costomization resourceObject from the rule "+ resObj.toXml());
+    }
+    else{
+     log.error("Error while running the costomization rule ");
+    }
+  
+  }
+ else
+ {
+  log.error("No customization rule found for the application");
+ }
+  
+  // Now we need to perform account aggregation for the resource object
+  //Creating argument for the aggregation task
+  
+  Attributes argMap= new Attributes();
+  argMap.put("promoteManagedAttributes",true);
+  
+  // Construct an aggregator 
+  
+  
+  </Source>
+</Rule>

@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="SKY attribute update rule" type="Correlation">
+  <Description>
+	Import template-defined Roles from a CSV file.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+  import sailpoint.object.*;
+  import java.util.*;
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+  import sailpoint.api.Provisioner;
+  
+  String idenName="Adam.Murphy";
+  List list=new ArrayList(Arrays.asList(idenName.split(",")));
+ 	if(list!=null)
+  {
+  	for(String name: list)
+    {
+    	Identity id=context.getObjectByName(Identity.class,name);
+      List linkList=id.getLinks();
+      if(linkList!=null)
+      {
+        ProvisioningPlan plan =new ProvisioningPlan();
+        List accReqList=new ArrayList();
+      	for(Link l: linkList)
+        {
+          AccountRequest accReq= new AccountRequest();
+          if("Claims Apps".equalsIgnoreCase(l.getApplicationName()))
+          {
+            accReq.setApplication(l.getApplicationName());
+            accReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+          	accReq.add( new AttributeRequest("email",ProvisioningPlan.Operation.Set, id.getEmail()));
+            accReq.setNativeIdentity(l.getNativeIdentity());
+            //accReq.setComments("");
+          }
+           else if("Sky - LDAP".equalsIgnoreCase(l.getApplicationName()))
+          {
+            accReq.setApplication(l.getApplicationName());
+            accReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+          	accReq.add( new AttributeRequest("mail",ProvisioningPlan.Operation.Set, id.getEmail()));
+            accReq.setNativeIdentity(l.getNativeIdentity());
+          }
+        	accReqList.add(accReq);
+        }
+        
+        if(accReqList!=null)
+        {
+        	plan.setIdentity(id);
+          plan.setAccountRequests(accReqList);
+            Provisioner prv=new Provisioner(context);
+          prv.execute(plan);
+        }
+      }
+      
+    }
+  }
+ 
+</Source>
+</Rule>
