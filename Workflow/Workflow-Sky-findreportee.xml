@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="sky-findReportee">
+  <Variable initializer="true" name="trace"/>
+  <Variable name="selectedManager"/>
+  <Variable name="launcher"/>
+  <Step icon="Start" name="Start" posX="35" posY="71">
+    <Transition to="Select Manager"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="607" posY="151"/>
+  <Step icon="Audit" name="Select Manager" posX="294" posY="173">
+    <Approval name="manager list" owner="ref:launcher" return="selectedManager" send="">
+      <Form name="Manager List">
+        <Attributes>
+          <Map>
+            <entry key="hideIncompleteFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="includeHiddenFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="pageTitle" value="Manager List"/>
+          </Map>
+        </Attributes>
+        <Section name="info11" type="text">
+          <Field name="Information">
+            <Script>
+              <Source>
+              
+              return "&lt;font color='#ff0000'&gt;&lt;strong&gt;Note: &lt;/strong&gt;"+ "Select a manager from the dropdown for whom reportee details is require"+ "&lt;/font&gt;";
+              </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Section name="Manager name">
+          <Field displayName="Select the manager here" filterString="managerStatus==true" name="selectedManager" type="sailpoint.object.Identity"/>
+        </Section>
+        <Button action="cancel" label="Cancel"/>
+        <Button action="next" label="Find Reportee"/>
+      </Form>
+    </Approval>
+    <Transition to="Show Reportees"/>
+  </Step>
+  <Step icon="Approval" name="Show Reportees" posX="435" posY="25">
+    <Approval name="Reportee details" owner="ref:launcher" return="" send="selectedManager,launcher">
+      <Form name="Reportee details">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Reportee details"/>
+          </Map>
+        </Attributes>
+        <Section name="info" type="text">
+          <Field name="Information" type="string">
+            <Script>
+              <Source>
+                import sailpoint.object.Identity;
+                Identity id= context.getObjectById(Identity.class,selectedManager);
+                String msg="Hi ";
+                msg+=launcher +", Please find the below reportee details for ";
+                
+                
+                String identityLink="&lt;a href=\"http://127.0.0.1:8080/skyview/define/identity/identity.jsf?id=";
+                       identityLink+=selectedManager+"\"&gt;";
+                       identityLink+= id.getName()+ "&lt;/a&gt;";
+                return msg+identityLink;
+              </Source>
+            </Script>
+          </Field>
+          <Field name="Reportee List" type="string">
+            <Script>
+              <Source>
+                import sailpoint.object.Identity;
+                import sailpoint.object.QueryOptions;
+                import sailpoint.object.Filter;
+                import java.util.*;
+                
+                QueryOptions qo=new QueryOptions();
+                qo.add(Filter.eq("manager.id",selectedManager));
+                List reportees=context.getObjects(Identity.class,qo);
+                List reporteeList=new ArrayList();
+                
+                for(Identity ids:reportees)
+                {
+                  String identityLink="&lt;a href=\"http://127.0.0.1:8080/skyview/define/identity/identity.jsf?id=";
+                       identityLink+=ids.getId()+"\"&gt;";
+                       identityLink+= ids.getName()+ "&lt;/a&gt;";
+                
+                	reporteeList.add(" "+identityLink);
+                }
+                return reporteeList;
+              
+              </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Button action="cancel" label="Close"/>
+      </Form>
+    </Approval>
+    <Transition to="Stop"/>
+  </Step>
+</Workflow>

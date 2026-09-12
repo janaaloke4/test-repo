@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="MyClaims_app-Create_form" type="Application">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="MyClaims_app-Create_form"/>
+    </Map>
+  </Attributes>
+  <Description>Form to create account into My Claims application</Description>
+  <Section name="Section 1">
+    <Field displayName="First Name" name="firstName" required="true" reviewRequired="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>return identity.getFirstname();</Source>
+      </Script>
+    </Field>
+    <Field displayName="Last Name" name="lastName" required="true" reviewRequired="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>return identity.getLastname();</Source>
+      </Script>
+    </Field>
+    <Field displayName="Employee Number" name="emp_no" required="true" reviewRequired="true" type="string">
+      <Script>
+        <Source>return identity.getAttribute("employeeId");</Source>
+      </Script>
+    </Field>
+    <Field displayName="Email" name="email" required="true" reviewRequired="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>return identity.getEmail();</Source>
+      </Script>
+    </Field>
+    <Field displayName="Account Status" helpKey="Select account status: false indicate disable account" name="acc_active" required="true" type="string">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <String>true</String>
+            <String>false</String>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="Phone Number" helpKey="Change phone number if you want to update the existing phone number" name="phone" required="true" reviewRequired="true" type="string">
+      <Script>
+        <Source>return identity.getAttribute("phoneNumber");</Source>
+      </Script>
+    </Field>
+    <Field displayName="Account Type" helpKey="Plese select secondary if primary kid already available, else no account will create" name="acount_type" required="true" type="string">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <String>primary</String>
+            <String>secondary</String>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="Job Id" name="jobId" required="true" reviewRequired="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>return identity.getAttribute("jobId");</Source>
+      </Script>
+    </Field>
+    <Field displayName="Account Number" name="kid" required="true" reviewRequired="true" type="string">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="sky-myClaims_account_generator"/>
+      </RuleRef>
+    </Field>
+    <Field displayName="Location" helpKey="Enter location manually if required" name="location" required="true" reviewRequired="true" type="string">
+      <Script>
+        <Source>return identity.getAttribute("location").toString();</Source>
+      </Script>
+    </Field>
+  </Section>
+</Form>

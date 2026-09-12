@@ -1,0 +1,235 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" libraries="Identity" name="SKY - Joiner initial phase" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event" transient="true">
+    <Description>The IdentityChangeEvent.  It can be used to build
+      the provisioning plan, but does not need to be
+      persisted with the case, so marked as transient.</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable name="plan">
+    <Description>The provisioning plan which is build during the workflow.</Description>
+  </Variable>
+  <Variable name="trace">
+    <Description>Used to debugging this workflow</Description>
+  </Variable>
+  <Description>Process a new employee into skyview domain and create all required initial  access, including application, entitlements and roles.</Description>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Process user"/>
+  </Step>
+  <Step icon="Message" name="Process user" posX="277" posY="9">
+    <Description>Process the user that joined.</Description>
+    <Script>
+      <Source>
+        // import packages for sql connection
+        import java.sql.Connection;
+        import java.sql.PreparedStatement;
+        import java.sql.SQLException;
+        import java.sql.Statement;
+        import java.sql.ResultSet;
+        //
+        import sailpoint.object.*;
+        import sailpoint.object.ProvisioningPlan;
+        import sailpoint.object.ProvisioningPlan.AccountRequest;
+        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+        import java.util.*;
+        import sailpoint.api.Provisioner;
+        import sailpoint.api.IdentityService;
+		
+        Identity iden=context.getObjectByName(Identity.class, identityName);
+        
+        System.out.println("Joiner started for : "+iden.getName()+" +++++++++++++++++++++++++++++++++++++++++");
+        
+        String firstName = iden.getFirstname();
+        String lastName = iden.getLastname(); 
+        String emp_no = iden.getAttribute("employeeId");
+        String email = iden.getEmail();
+        String acc_active = "false";
+        String phone = iden.getAttribute("phoneNumber");
+        String acount_type = "primary";
+        String jobId = iden.getAttribute("jobId");
+        String kid = iden.getAttribute("primaryKid");
+        String location = iden.getAttribute("location").toString();
+		
+        
+        // Checking if the primary kid is already available for the user in accounts table
+        
+        Connection connection = context.getJdbcConnection();
+        PreparedStatement statemant=connection.prepareStatement("select * from claims.accounts where email=? and acount_type='primary'");
+        statemant.setString (1,email);
+        
+        ResultSet rs=statemant.executeQuery();
+		
+		ProvisioningPlan plan =new ProvisioningPlan();
+		List acntReq= new ArrayList();
+		
+        if(rs.next())
+        {
+        		System.out.println(" User primary kid: "+ kid+" is already exist in claims apps.");
+        		//  We are not going to create a new primary kid of a user if it is already exist in claims database (accounts tables)
+        }
+        else
+        {
+            
+            AccountRequest accReq = new AccountRequest();   
+
+            accReq.setOperation(AccountRequest.Operation.Create);
+            accReq.setApplication("Claims Apps");
+
+            accReq.add(new AttributeRequest("firstName",ProvisioningPlan.Operation.Set,firstName));
+            accReq.add(new AttributeRequest("lastName",ProvisioningPlan.Operation.Set,lastName));
+            accReq.add(new AttributeRequest("emp_no",ProvisioningPlan.Operation.Set,emp_no));
+            accReq.add(new AttributeRequest("email",ProvisioningPlan.Operation.Set,email));
+            accReq.add(new AttributeRequest("acc_active",ProvisioningPlan.Operation.Set,acc_active));
+            accReq.add(new AttributeRequest("phone",ProvisioningPlan.Operation.Set,phone));
+            accReq.add(new AttributeRequest("acount_type",ProvisioningPlan.Operation.Set,acount_type));
+            accReq.add(new AttributeRequest("jobId",ProvisioningPlan.Operation.Set,jobId));
+            accReq.add(new AttributeRequest("kid",ProvisioningPlan.Operation.Set,kid));
+            accReq.add(new AttributeRequest("location",ProvisioningPlan.Operation.Set,location));
+
+            accReq.setNativeIdentity(kid);
+			acntReq.add(accReq);
+    }
+	
+	// For LADP Account creation
+	
+		
+		Application app = context.getObject(Application.class, "Sky - LDAP");
+        IdentityService ids = new IdentityService(context);
+        List allLDAPapp = ids.getLinks(iden, app);
+		boolean flag=false;
+		for(Link l: allLDAPapp)
+		{
+			if(kid.equals(l.getDisplayName()))
+			{
+				flag=false;
+				 break;
+			}
+			else
+				flag=true;
+		}
+	   if(flag || allLDAPapp.isEmpty())   // No primary account is exist create a new one
+	   {
+		   
+		   System.out.println("No primary account in LDAP is exist, create a new one");
+		   AccountRequest ldapAccReq = new AccountRequest();   
+
+            ldapAccReq.setOperation(AccountRequest.Operation.Create);
+            ldapAccReq.setApplication("Sky - LDAP");
+			// Genarating dn value based on employee type
+			String dn="cn="+kid+",";
+			
+			// end dn
+			List carLicense = new ArrayList();
+			carLicense.add("microSoft office 365");
+			carLicense.add("memberOf PowerBi");
+      carLicense.add("cn=xyzAzure365F3-Default");
+			if("Internal".equals(iden.getAttribute("Emp_type")))
+			{
+			 carLicense.add("sfPeople");
+			 dn=dn+"ou=EmployeeCenter,dc=skyview,dc=com";
+			}
+			else
+			{
+			 dn=dn+"ou=Contractor-External,dc=skyview,dc=com";
+			 carLicense.add("contractorPortal");
+			}
+            ldapAccReq.add(new AttributeRequest("carLicense",ProvisioningPlan.Operation.Set,carLicense));
+            ldapAccReq.add(new AttributeRequest("sn",ProvisioningPlan.Operation.Set,lastName));
+			ldapAccReq.add(new AttributeRequest("givenName",ProvisioningPlan.Operation.Set,firstName));
+			ldapAccReq.add(new AttributeRequest("cn",ProvisioningPlan.Operation.Set,kid));
+			if(iden.getAttribute("costcenter")!=null)
+				ldapAccReq.add(new AttributeRequest("departmentNumber",ProvisioningPlan.Operation.Set,iden.getAttribute("costcenter")));
+			if(firstName!=null)
+				ldapAccReq.add(new AttributeRequest("displayName",ProvisioningPlan.Operation.Set,firstName+" "+lastName));
+			ldapAccReq.add(new AttributeRequest("dn",ProvisioningPlan.Operation.Set,dn));
+			if(emp_no!=null)
+				ldapAccReq.add(new AttributeRequest("employeeNumber",ProvisioningPlan.Operation.Set,emp_no));
+			if(iden.getAttribute("Emp_type")!=null)
+				ldapAccReq.add(new AttributeRequest("employeeType",ProvisioningPlan.Operation.Set,iden.getAttribute("Emp_type")));
+			if(email!=null)
+				ldapAccReq.add(new AttributeRequest("mail",ProvisioningPlan.Operation.Set,email));
+			ldapAccReq.add(new AttributeRequest("street",ProvisioningPlan.Operation.Set,location));			
+            ldapAccReq.add(new AttributeRequest("telephoneNumber",ProvisioningPlan.Operation.Set,phone));
+			
+            ldapAccReq.add(new AttributeRequest("uid",ProvisioningPlan.Operation.Set,firstName+"."+lastName+emp_no));
+    
+           
+            
+
+            ldapAccReq.setNativeIdentity(dn);
+			acntReq.add(ldapAccReq);
+	   }
+        
+        else
+        {
+        	System.out.println("Primary account in LDAP is exist, hence no need to create new account");
+        }
+	
+	// Executing all request in plan
+	
+	        
+            
+		if(acntReq!= null)
+		{
+            plan.setIdentity(iden);
+            plan.setAccountRequests(acntReq);
+
+            Provisioner provisioner = new Provisioner(context);
+            provisioner.setOptimisticProvisioning(true);
+
+            try
+            {
+                provisioner.compile(plan); //Compile the plan into a project
+                provisioner.execute(plan); //Compile and execute a plan in one call.
+								System.out.println("My Joinner user plan : "+ plan.toXml());
+            }
+            catch(Exception e)
+            {
+
+            }
+		}
+	
+      </Source>
+    </Script>
+    <Transition to="Notification"/>
+  </Step>
+  <Step icon="Email" name="Notification" posX="532" posY="97">
+    <Script>
+      <Source>
+      
+      import sailpoint.object.*;
+      import sailpoint.object.EmailOptions;
+      import java.util.*;
+      
+      Identity id=context.getObjectByName(Identity.class,identityName);
+      Identity manager=id.getManager();
+      EmailTemplate emailTemplate =context.getObjectByName(EmailTemplate.class,"Joiner Notification for manager");
+      EmailOptions ops=new EmailOptions();
+      ops.setTo(manager.getEmail());
+      ops.setCc(id.getEmail());
+        
+      Map emailopsList =new HashMap();
+      emailopsList.put("manager",manager.getFullName());
+      emailopsList.put("userName",id.getFirstname() +" "+ id.getLastname() );
+      emailopsList.put("startDate",id.getAttribute("hireDate"));
+      emailopsList.put("empType",id.getAttribute("Emp_type"));
+      emailopsList.put("emp_id",id.getAttribute("employeeId"));
+      emailopsList.put("account",id.getAttribute("primaryKid"));
+      emailopsList.put("userEmail",id.getEmail());
+        
+      ops.setVariables(emailopsList);
+      
+      context.sendEmailNotification(emailTemplate, ops);
+        System.out.println("Email has been triggered");
+      </Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="770" posY="13"/>
+</Workflow>

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="SKY-Create-ProvisioningPolicy-Form-Payflow" type="Application">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="SKY-Create-ProvisioningPolicy-Form-Payflow"/>
+    </Map>
+  </Attributes>
+  <Description/>
+  <Section name="Section 1">
+    <Field displayName="First Name" name="firstName" type="string">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Sky-FieldValue-Rule-FirstName"/>
+      </RuleRef>
+    </Field>
+    <Field displayName="Last Name" name="lastName" type="string">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Sky-FieldValue-Rule-LastName"/>
+      </RuleRef>
+    </Field>
+  </Section>
+</Form>

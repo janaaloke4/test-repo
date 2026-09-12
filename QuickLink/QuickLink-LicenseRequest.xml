@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="workflow" category="ManageTeam" messageKey="License Request" name="License Request" ordering="3">
+  <Attributes>
+    <Map>
+      <entry key="workflowName" value="sky_LicenseRequest"/>
+    </Map>
+  </Attributes>
+  <Description>Request License for Repotee</Description>
+  <QuickLinkOptions allowOther="true">
+    <DynamicScopeRef>
+      <Reference class="sailpoint.object.DynamicScope" name="Manager"/>
+    </DynamicScopeRef>
+  </QuickLinkOptions>
+</QuickLink>

@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="sky-workGroupDetails" type="">
+  <Variable initializer="true" name="trace"/>
+  <Variable name="wgName"/>
+  <Variable name="wrkgmemnberList"/>
+  <Variable name="launcher"/>
+  <Description>WorkFlow to find workGroup details for open access request</Description>
+  <Step icon="Start" name="Start" posX="22" posY="85">
+    <Transition to="Input Step"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="907" posY="75"/>
+  <Step icon="Task" name="Input Step" posX="210" posY="39">
+    <Approval name="Find WorkGroup Details" owner="ref:launcher" return="wgName">
+      <Form name="Find WorkGroup Details">
+        <Attributes>
+          <Map>
+            <entry key="hideIncompleteFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="includeHiddenFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="isWizard">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="pageTitle" value="Find WorkGroup Details"/>
+          </Map>
+        </Attributes>
+        <Section name="Section 1">
+          <Field displayName="Provide WorkGroup Name" name="wgName" required="true" type="string"/>
+        </Section>
+        <Button action="back" label="Back"/>
+        <Button action="cancel" label="Cancel"/>
+        <Button action="next" label="Next"/>
+      </Form>
+    </Approval>
+    <Description>User need to put WorkGroup name</Description>
+    <Transition to="Input Analysis"/>
+  </Step>
+  <Step icon="Analysis" name="OutPut details" posX="641" posY="129">
+    <Approval name="WorkGroup OutPut form" owner="ref:launcher" send="wrkgmemnberList">
+      <Form name="WorkGroup OutPut form">
+        <Attributes>
+          <Map>
+            <entry key="hideIncompleteFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="includeHiddenFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="pageTitle" value="WorkGroup OutPut form"/>
+          </Map>
+        </Attributes>
+        <Section label="Requested WorkGroup member Details" name="info">
+          <Field name="WorkGroup Details - [UserName - Email - isActive User]" type="string">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="script:return true;"/>
+              </Map>
+            </Attributes>
+            <Script>
+              <Source>
+                
+                if(wrkgmemnberList!=null)
+                {
+	
+                  if (wrkgmemnberList instanceof String) 
+                  {
+                		if(wrkgmemnberList.equals("Not Valid WorkGroup Name"))
+                       return "Not Valid WorkGroup Name - Kindly check WorkGroup Name in the accessRequest";
+                    else
+                			return wrkgmemnberList;
+                  }
+                  else
+                  {
+                    return wrkgmemnberList;
+                  }
+                }
+                else
+                return "Not Valid Input";
+              
+              </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Button action="next" label="Close"/>
+      </Form>
+    </Approval>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Audit" name="Input Analysis" posX="337" posY="173" resultVariable="wrkgmemnberList">
+    <Script>
+      <Source>
+        import sailpoint.object.Identity;      
+        import sailpoint.api.ObjectUtil;
+        import java.util.*;
+
+  
+        log.error("################# WorkGroup details check  ###############");
+				log.error("Work Group name in the input: "+ wgName);
+        List wrkgmemnberList = new ArrayList();
+        Identity workgroup;
+        workgroup=context.getObjectByName(Identity.class,wgName);
+         if(workgroup==null)
+        {
+           workgroup=context.getObjectByName(Identity.class,wgName.trim());
+        }
+        
+        if(workgroup!=null)
+        {
+        log.error("Work Group Found .............................. ");
+        if(workgroup.isWorkgroup()){
+         
+          Iterator wrkGrpmembers = ObjectUtil.getWorkgroupMembers(context, workgroup, null);
+
+          // wrkgmemnberList.add("UserName"+ " - "+"Email" + " - "+is Active  );
+          while(wrkGrpmembers.hasNext()){
+          Object[] object = (Object[]) wrkGrpmembers.next();
+          Identity ids = (Identity) object[0];
+          wrkgmemnberList.add("[ "+ ids.getName() +" - "+ids.getEmail() + " - "+ids.isInactive() +" ]"  );
+          System.out.println(ids.getName()+" - "+ids.isInactive());
+          }
+         return wrkgmemnberList;
+        }
+       else 
+        return "Not Valid WorkGroup Name";
+        }
+         else 
+        return "Not Valid WorkGroup Name";
+
+      </Source>
+    </Script>
+    <Transition to="OutPut details"/>
+  </Step>
+</Workflow>

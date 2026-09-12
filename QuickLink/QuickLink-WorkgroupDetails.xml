@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="workflow" category="Custom" messageKey="WorkGroup Details" name="WorkGroup Details" ordering="1">
+  <Attributes>
+    <Map>
+      <entry key="workflowName" value="sky-workGroupDetails"/>
+    </Map>
+  </Attributes>
+  <Description>quicklink_access_reviews_desc</Description>
+  <QuickLinkOptions allowSelf="true">
+    <DynamicScopeRef>
+      <Reference class="sailpoint.object.DynamicScope" name="Everyone"/>
+    </DynamicScopeRef>
+  </QuickLinkOptions>
+</QuickLink>
