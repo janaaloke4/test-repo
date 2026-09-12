@@ -1,0 +1,553 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Mizuho-Rule-JA-Delimited-App-Creation-utility" type="Correlation">
+  <Description>
+    Import template-defined Roles from a CSV file.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+
+  import sailpoint.object.Application;
+  import sailpoint.object.Rule;
+  import sailpoint.object.Form.Section;
+  import sailpoint.object.Form;
+  import sailpoint.object.FormRef;
+  import sailpoint.object.Field;
+  import sailpoint.object.Attributes;
+  import sailpoint.object.Identity;
+  import sailpoint.object.TaskDefinition;
+  import sailpoint.object.TaskItemDefinition.Type;
+  import java.util.*;
+  import sailpoint.object.Filter;
+  import sailpoint.object.QueryOptions;
+  import sailpoint.object.Schema;
+  import sailpoint.object.AttributeDefinition;
+  
+  //
+    public boolean ifExistingTask(String taskName)
+  {
+  	//TaskDefinition existing=context.getObjectByName(TaskDefinition.class,taskName);
+    if(context.getObjectByName(TaskDefinition.class,taskName) !=null)
+    {
+
+      return true;
+    }
+      else
+        return false;
+  }
+  
+  // create Account AggregationTask
+  public void createAccountAggregationTask(String appName)
+  {
+  	String taskName="Sky-accountAggregation-"+appName;
+    boolean isExist= ifExistingTask(taskName);
+    if(isExist)
+    {
+    	return;
+    }
+    else
+    {
+    TaskDefinition task=new TaskDefinition();
+    
+    task.setName(taskName);
+    task.setType(Type.AccountAggregation);
+    task.setSubType("task_item_type_acct_aggregation");
+    task.setResultAction(TaskDefinition.ResultAction.Delete);
+    task.setFormPath("/monitor/tasks/accountAggregationTask.xhtml");
+    task.setOwner(context.getObjectByName(Identity.class,"spadmin"));
+    task.setParent(context.getObjectByName(TaskDefinition.class,"Account Aggregation"));
+    
+    Attributes attrs=new Attributes();
+    attrs.put("applications",appName);
+		attrs.put("checkDeleted","true");
+    attrs.put("checkHistory","false");
+		attrs.put("checkPolicies","false");
+    attrs.put("correlateEntitlements","false");
+		attrs.put("correlateOnly","true");
+    attrs.put("correlateScope","false");
+		attrs.put("deltaAggregation","false");
+    attrs.put("enableManagedAttributeRenameDetection","false");
+    attrs.put("enablePartitioning","false");
+		attrs.put("haltOnMaxError","false");
+    attrs.put("noAutoCreateApplications","false");
+    attrs.put("noNeedsRefresh","false");
+		attrs.put("noOptimizeReaggregation","false");
+    attrs.put("promoteManagedAttributes","false");
+    attrs.put("refreshScorecard","false");
+		attrs.put("sequential","false");
+    attrs.put("taskCompletionEmailNotify","Disable");
+    attrs.put("taskCompletionEmailRecipients","");
+    attrs.put("taskCompletionEmailTemplate","");
+    attrs.put("logAllowedActions","CorrelateManual, CorrelateMaintain, CorrelateNewAccount, CorrelateReassign, Create, Ignore, Remove");
+    
+    task.setArguments(attrs);
+    context.saveObject(task);
+    context.commitTransaction();    
+    }
+  }
+  
+  // create Group Aggregation Task
+  
+   public void createGroupAggregationTask(String appName)
+  {
+  	String taskName="Sky-groupAggregation-"+appName;
+    boolean isExist= ifExistingTask(taskName);
+    if(isExist)
+    {
+    	return;
+    }
+    TaskDefinition task=new TaskDefinition();
+    
+    task.setName(taskName);
+    task.setType(Type.AccountGroupAggregation);
+    task.setSubType("task_item_type_acct_grp_aggregation");
+    task.setResultAction(TaskDefinition.ResultAction.Delete);
+    task.setFormPath("/monitor/tasks/accountGroupAggregationTask.xhtml");
+    task.setOwner(context.getObjectByName(Identity.class,"spadmin"));
+    task.setParent(context.getObjectByName(TaskDefinition.class,"Account Group Aggregation"));
+    
+    Attributes attrs=new Attributes();
+    attrs.put("applications",appName);
+    attrs.put("aggregationType","group");
+		attrs.put("checkDeleted","false");
+    attrs.put("deltaAggregation","false");
+		attrs.put("descriptionLocale","en_US");
+    attrs.put("enablePartitioning","false");
+		attrs.put("groupSchema","");
+    attrs.put("haltOnMaxError","false");
+		attrs.put("promoteClassifications","false");
+		attrs.put("accountGroupRefreshRule","Sky-groupAgg-Rule");
+    attrs.put("taskCompletionEmailNotify","Disable");
+    attrs.put("taskCompletionEmailRecipients","");
+    attrs.put("taskCompletionEmailTemplate","");
+   
+    
+    task.setArguments(attrs);
+    context.saveObject(task);
+    context.commitTransaction();             
+  }
+  
+  
+  // Input Validation Start Here
+  
+  public void validInput( Map input) 
+  {
+   if(input==null)
+     return "input map is null";
+   if(input.get("applicationName")==null)
+     return "Application Name is null";
+   if(input.get("connectorAttributes")==null)
+   	return "connectorAttributes are not set";
+  }
+  // Input Validation End Here
+  
+  // Rename in case of any existing application Start here
+  public void renameExistingApplication(String applicationName)
+  {
+  	Application existingApp = context.getObjectByName(Application.class, applicationName);
+    if(existingApp== null)
+      return;
+    else
+    {
+    	String oldName=applicationName+"-OLD";
+      existingApp.setName(oldName);
+      context.saveObject(existingApp);
+      context.commitTransaction();
+    }
+  }
+  // Rename in case of any existing application End here
+  
+  // Define and set ConnectorAttributes Stert Here
+  
+  public Attributes createConnectorAttributes( Map map)
+  {
+  	Attributes attr=new Attributes();
+    Iterator itr=map.keySet().iterator();
+    while(itr.hasNext())
+    {
+    	String key=(String) itr.next();
+      Object value= map.get(key);
+      attr.put(key,value);
+    }
+    return attr;
+  }
+  // Define and set ConnectorAttributes End Here
+  
+  // addSchemaAttributes in account schema Start here
+  public void addSchemaAttributes(Schema schema,List attrs)
+  {
+  	Iterator itr =  attrs.iterator();
+     while(itr.hasNext())
+     {
+     	Map map =(Map) itr.next();
+       AttributeDefinition ad= new AttributeDefinition();
+       ad.setName((String) map.get("name"));
+       //ad.setDisplayName((String) map.get("displayName"));
+       if((String) map.get("Type")!=null)
+       ad.setType((String) map.get("Type"));
+       else
+         ad.setType("string");
+     //  if( map.get("managed") !=null $amp;$amp; Boolean.TRUE.equals((String) map.get("managed")))
+     //    ad.setManaged(true);
+       schema.addAttributeDefinition(ad);
+     }
+  }
+  
+  // Define Account Schema
+  public Schema createAccountSchema(Map input)
+  {
+  	Schema schema =new Schema();
+    schema.setObjectType("account");
+    schema.setDisplayAttribute((String) input.get("setDisplayAttribute"));
+    schema.setIdentityAttribute((String) input.get("setIdentityAttribute"));
+    schema.setNativeObjectType("account");
+    List attrs=(List)  input.get("accountAttribute");
+    addSchemaAttributes(schema,attrs);
+    return schema;
+  }
+  
+  // Define GroupSchema
+    
+    public Schema createGroupSchema(Map input)
+  {
+  	Schema schema =new Schema();
+    schema.setObjectType("group");
+    schema.setAggregationType("group");
+    schema.setDisplayAttribute((String) input.get("groupDisplayAttribute"));
+    if((String) input.get("setDescriptionAttribute")!=null)
+      	schema.setDescriptionAttribute((String) input.get("setDescriptionAttribute"));
+    if((String) input.get("setgrpIdentityAttribute")!=null)
+    	  schema.setIdentityAttribute((String) input.get("setgrpIdentityAttribute"));
+    schema.setNativeObjectType( input.get("groupObjectType"));
+      
+    List attrs=(List)  input.get("groupAttribute");
+    addSchemaAttributes(schema,attrs);
+    return schema;
+  }
+  
+  // Add Correlation Rule
+  public void attachCorrelationRule(Application app, Map input)
+  {
+    
+    
+  		String ruleName= (String) input.get("correlationRule");
+      Rule rule= context.getObjectByName(Rule.class,ruleName);
+      if(rule!=null)
+      {
+      	app.setCorrelationRule(rule);
+      }
+    
+  }
+  
+   // Add Customization Rule
+  public void attachCustomizationRule(Application app, Map input)
+  {
+    
+  		String ruleName= (String) input.get("customizationRule");
+      Rule rule= context.getObjectByName(Rule.class,ruleName);
+      if(rule!=null)
+      {
+      	app.setCustomizationRule(rule);
+      }
+    
+  }
+  
+  // Attach existing policy form(for existing form) or Create and attache policy form (for not existing form)
+  //
+  public Form createProvisioningForm(String formName, Map input)
+  {
+  	String finalFormName=formName;
+    Form existing =context.getObjectByName(Form.class,formName);
+    if(existing!=null)
+      finalFormName=formName+"-New";
+    Form form = new Form();
+    form.setName(finalFormName);
+    form.setType(Form.Type.Application);
+
+    
+    Section section = new Section();
+    section.setName("Section 1");
+    
+    List fields=(List) input.get("provisioningField");
+    Iterator itr= fields.iterator();
+    while(itr.hasNext())
+    {
+    	Map map=(Map) itr.next();
+      String attribute=(String) map.get("schemaAttributeName");
+      String ruleName="";
+      if((String) map.get("ruleName")!=null)
+      ruleName = (String) map.get("ruleName");
+      
+      if(ruleName== null &amp;&amp; (attribute.equalsIgnoreCase("lastName") || attribute.equalsIgnoreCase("last Name")))
+        ruleName="Sky-FieldValue-Rule-LastName";
+      
+      Field field=new Field();
+      field.setName(attribute);
+      field.setDisplayName(attribute);
+      field.setType("string");
+      if(ruleName!=null)
+      {
+        Rule rule=context.getObjectByName(Rule.class,ruleName);
+        if(rule!=null)
+        field.setRule(rule);
+      }
+      section.add(field);
+    }
+    Attributes attrs= new Attributes();
+    attrs.put("pageTitle",finalFormName);
+    form.setAttributes(attrs);
+    form.add(section);
+    
+    context.saveObject(form);
+    context.commitTransaction();
+    
+    return form;
+    // pending from here
+  }
+  
+  public void attachProvisioningForm (Application app, Map input)
+  {
+  	Boolean existingForm = (Boolean) input.get("IsPolicyFormAlreadyExist");
+    String formName = (String) input.get("createProvisioningFormName");
+    // Add policy form if already exist
+    List formList=new ArrayList();
+    Form form= new Form();
+    
+    if( existingForm!=null &amp;&amp; existingForm.booleanValue() &amp;&amp; context.getObjectByName(Form.class,formName)!=null  )
+    {
+    	 form=context.getObjectByName(Form.class,formName);
+       
+    }
+    else
+    {
+    	 form= createProvisioningForm(formName, input);
+      
+    }
+   // form.setFormRef(new FormRef(form.getId(),form.getName()));
+   // form.remove(form.getSection());
+   
+    //Form appForm= (Form) form.deepCopy(context);
+    Form appForm= new Form();
+    appForm.setName(formName);
+    appForm.setObjectType("account");
+    appForm.setType(Form.Type.Create);
+    if(form.getAttributes()!=null)
+    {
+    appForm.setAttributes(form.getAttributes());
+    }
+    FormRef ref=new FormRef();
+    
+    appForm.setFormRef(new FormRef(form.getId(),form.getName()));
+    
+    formList.add(appForm);
+       app.setProvisioningForms(formList);
+  }
+  
+  // Create Application configuration Start Here
+  
+  //public Application createDeliitedApplication(Map input)
+  public String createDeliitedApplication(Map input)
+  {
+  	String applicationName = (String) input.get("applicationName");
+    
+    renameExistingApplication(applicationName);
+    
+    Application app = new Application();
+    app.setName(applicationName);
+    app.setType("DelimitedFile");
+   /*
+    if(input.get("appDescription")!=null)
+    {
+      Map desMap= new HashMap();
+      desMap.put("en_US",input.get("appDescription"));
+       app.setDescriptions(desMap);
+    }
+    */
+    if(input.get("owner")!=null)
+    {
+      Identity owner=context.getObjectByName(Identity.class,input.get("owner"));
+      if(owner!=null)
+        app.setOwner(owner);
+      else
+        app.setOwner(context.getObjectByName(Identity.class,"spadmin"));
+
+    }
+    Map connectorAttributes = (Map) input.get("connectorAttributes");
+    Attributes attrs = createConnectorAttributes(connectorAttributes);
+    app.setAttributes(attrs);
+    app.setFeaturesString("DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA");
+    app.setIcon("enterpriseIcon");
+    app.setConnector("sailpoint.connector.DelimitedFileConnector");
+    app.setTemplateApplication("DelimitedFile Template");
+    // Adding Account Schema
+    Schema accountSchema= createAccountSchema(input);
+    app.setSchema(accountSchema);
+    
+    // Adding Group Schema
+    Schema groupSchema=createGroupSchema(input);
+    app.setSchema(groupSchema);
+   
+    // Adding App Rules
+    if((String) input.get("correlationRule")!=null)
+    {
+     attachCorrelationRule(app,input);
+    }
+    if((String) input.get("customizationRule")!=null)
+    {
+   	// attachCustomizationRule(app,input);
+    }
+    
+    // Addach Provisioning form 
+    attachProvisioningForm(app,input);
+    
+    context.saveObject(app);
+    context.commitTransaction();
+      
+    return "My new App name is: "+applicationName;
+  }
+  
+  // Create Application configuration End Here
+  
+  // Require details for delimited app configuration
+  
+  Map connector = new HashMap();
+  Map input = new HashMap();
+  
+  // ##################### Dont Change #########################
+  connector.put("filetransport","local");
+  //connector.put("filetransport","sftp");
+  //connector.put("host","deoHost");
+  connector.put("transportUser","User1");
+  connector.put("transportUserPassword","123");
+  
+  connector.put("parseType","Delimited");
+  connector.put("hasHeader",true);
+  connector.put("group.filetransport","local");
+  connector.put("ftpsAuthMethod","password");
+  
+  // #########################################################
+  // inpur require: Start here
+  
+  input.put("applicationName","aj");
+  input.put("appDescription","This is demo app created fro the rule utility");
+  input.put("owner","Adam.Murphy");
+  
+  //Set Account schema file path 
+  connector.put("file","E:\\payFlowUser.csv");
+  connector.put("delimiter",","); // Change only if dilemiter is not , seperated
+  
+  //Set Group Schema FilePath ******* NOTE:  Replace groupRole name with the group type you want to create like: group,Entitlement
+  String groupObjectType="group"; // Specify the group Schema object type like - group, entitlement, role, groupRole etc
+  connector.put(groupObjectType+".delimiter",",");
+  connector.put(groupObjectType+".file","E:\\payFlowUserAccess.csv");
+  connector.put(groupObjectType+".hasHeader",true);
+
+  
+  
+  // Define Accpunt schema details - for each attributes create different map like in the below example we have two attributes (fullName and email) 
+  // so i have create two map and added them in the list. Note that if you dont pass Type then rule will set String as a default type
+  
+  List accountattList = new ArrayList();
+  
+  Map accAttr1=new HashMap();
+  accAttr1.put("name","fullName");
+  accAttr1.put("Type","string"); // if type is string - then no need to mention this 
+  accountattList.add(accAttr1);
+  
+  Map accAttr2=new HashMap();
+  accAttr2.put("name","email");
+  accAttr2.put("Type","string");
+  accountattList.add(accAttr2);
+  
+  input.put("setDisplayAttribute","fullName");
+  input.put("setIdentityAttribute","email");
+  
+   // Define Group schema details - for each attributes create map like in the below example we have two attributes (entitlement and description) 
+  // so i have create two map and added them in the list. 
+  
+  List groupAttributes = new ArrayList();
+  Map grpAttr1=new HashMap();
+  grpAttr1.put("name","entitlement");
+	groupAttributes.add(grpAttr1);
+  
+  Map grpAttr2=new HashMap();
+  grpAttr2.put("name","description");
+	groupAttributes.add(grpAttr2);
+  
+  input.put("groupDisplayAttribute","entitlement");
+  input.put("setDescriptionAttribute","description");
+  input.put("setgrpIdentityAttribute","entitlement");
+  
+  
+  // Set Application Rule - if dont want to set any rul then just commentout the input
+  input.put("correlationRule","Sky-CorrelationRule-email");
+  input.put("customizationRule","Sky-Customization-Rule");
+  
+  // *************** Add CreatePolicyProvisioning Form 
+  input.put("createProvisioningFormName","SKY-Create-ProvisioningPolicy-Form-Payflow");
+  input.put("IsPolicyFormAlreadyExist",true);  // set this to true if create policy form already exist, and you dnot want to create through this rule
+ // input.put("IsPolicyFormAlreadyExist",false);
+  
+  // if existingCreatePolicyForm == false (Thats means you want to create form using this rule. To do that please provide field details in below.
+  // Note that 
+  
+  List provisioningFileds =new ArrayList();
+  
+  Map field1= new HashMap();
+  field1.put("schemaAttributeName","firstName");
+  field1.put("ruleName","Sky-FieldValue-Rule-FirstName");
+  provisioningFileds.add(field1);
+  
+  Map field2= new HashMap();
+  field2.put("schemaAttributeName","lastName");
+  //field2.put("ruleName","Sky-FieldValue-Rule-LastName");
+  provisioningFileds.add(field2);
+  
+ // ##################### Dont Change Anything below #########################
+  input.put("accountAttribute",accountattList);
+  input.put("groupAttribute",groupAttributes);
+  input.put("connectorAttributes",connector);
+  if(provisioningFileds!=null)
+  input.put("provisioningField",provisioningFileds);
+ // #########################################################
+  
+ // Main Entry Start
+  
+
+  validInput(input);
+  createDeliitedApplication(input);
+  Application myNewApp=context.getObjectByName(Application.class,input.get("applicationName"));
+  if(input.get("appDescription")!=null)
+    {
+      Map desMap= new HashMap();
+      desMap.put("en_US",input.get("appDescription"));
+      myNewApp.setDescriptions(desMap);
+      
+      context.saveObject(myNewApp);
+      context.commitTransaction();
+    }
+  
+  createAccountAggregationTask(input.get("applicationName"));
+  createGroupAggregationTask(input.get("applicationName"));
+ // Application app = createDeliitedApplication(input);
+ // return app;
+  
+ // Main Entry End
+
+
+
+  </Source>
+</Rule>

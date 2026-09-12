@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="sky-roleIndexRefresh" type="Correlation">
+  <Description>
+	Import template-defined Roles from a CSV file.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+  import sailpoint.object.*;
+  import sailpoint.object.RoleIndex;
+   System.out.println("Running rule   ..................... ");
+  Bundle bundle= context.getObject(Bundle.class, "roleIndex-business");
+  RoleIndex ri =new RoleIndex();
+  ri.setBundle(bundle);
+  context.commitTransaction();
+ 
+</Source>
+</Rule>

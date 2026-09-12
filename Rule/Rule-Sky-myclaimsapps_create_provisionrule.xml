@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="sky-myClaimsApps_Create_ProvisionRule" type="JDBCOperationProvisioning">
+  <Description>This rule is used by the JDBC connector to do provisioning of the data .</Description>
+  <Signature returnType="ProvisioningResult">
+    <Inputs>
+      <Argument name="log" type="org.apache.commons.logging.Log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context" type="sailpoint.api.SailPointContext">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>The application whose data file is being processed.</Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>The Schema currently in use.</Description>
+      </Argument>
+      <Argument name="connection">
+        <Description>A connection object to connect to database.</Description>
+      </Argument>
+      <Argument name="plan">
+        <Description>The ProvisioningPlan created against the JDBC application.</Description>
+      </Argument>
+      <Argument name="request">
+        <Description>The ProvisioningRequest created against the JDBC application.</Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>A Provisioning Result object is desirable to return the status.IT can be a new object or part of  Provisioning Plan</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>import java.sql.Connection;
+  import java.sql.DriverManager;
+  import java.sql.PreparedStatement;
+  import java.sql.SQLException;
+  import java.sql.Types;
+  import java.util.List;
+  import sailpoint.api.SailPointContext;
+  import sailpoint.connector.JDBCConnector;
+  import sailpoint.object.Application;
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+  import sailpoint.object.ProvisioningResult;
+  import sailpoint.object.Schema;
+  import sailpoint.object.Identity;
+  import sailpoint.object.Filter;
+  import sailpoint.object.QueryOptions;
+  import sailpoint.api.IdentityService;
+  import sailpoint.object.*;
+  ProvisioningResult result =new ProvisioningResult();
+  
+  // User can have multiple secondary accounts but primary account must be only one.
+  // Checking existing of primary account
+  if("primary".equals((String) request.getAttributeRequest("acount_type").getValue())) 
+  {
+      QueryOptions qo= new QueryOptions();
+      qo.add(Filter.eq("email",(String) request.getNativeIdentity()));
+      List ids=context.getObjects(Identity.class, qo);
+      Application app=context.getObjectByName(Application.class,"Claims Apps");
+      for (Identity id: ids)
+       {
+          IdentityService is=new IdentityService(context);
+          List links =is.getLinks(id,app);
+          for(Link link: links)
+          {
+            if("primary".equals(link.getAttribute("acount_type").toString()))
+            {
+              System.out.println(id.getName()+" already have a primary account on Claims App. Hence as per the policy another primary kid can't be create");
+              return null;
+            } 
+          }
+       }
+  }
+  // Account provissioning logic
+  
+  try{
+
+        String firstName= (String) request.getAttributeRequest("firstName").getValue();
+        String lastName= (String) request.getAttributeRequest("lastName").getValue();
+        String emp_no= (String) request.getAttributeRequest("emp_no").getValue();
+        String email= (String) request.getAttributeRequest("email").getValue();
+        String acc_active= (String) request.getAttributeRequest("acc_active").getValue();
+        String phone= (String) request.getAttributeRequest("phone").getValue();
+        String acount_type= (String) request.getAttributeRequest("acount_type").getValue();
+        String jobId= (String) request.getAttributeRequest("jobId").getValue();
+        String kid= (String) request.getNativeIdentity(); 
+        String location= (String) request.getAttributeRequest("location").getValue();
+  
+        String sql="INSERT INTO accounts(firstName,lastName,emp_no,email,acc_active,phone,acount_type,jobId,kid,location) values(?,?,?,?,?,?,?,?,?,?)";
+        PreparedStatement statemant=connection.prepareStatement(sql);
+        statemant.setString (1,firstName);
+        statemant.setString (2,lastName);
+        statemant.setString (3,emp_no);
+        statemant.setString (4,email);
+        statemant.setString (5,acc_active);
+        statemant.setString (6,phone);
+        statemant.setString (7,acount_type);
+        statemant.setString (8,jobId);
+        statemant.setString (9,kid);
+        statemant.setString (10,location);
+        statemant.executeUpdate();
+    
+    //...................... For entitlement request ............................
+       // List ents
+      // String ent_sql="INSERT INTO mygroups (email,entitlement) values(?,?)";
+        result.setStatus( ProvisioningResult.STATUS_COMMITTED );
+ System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^   Successfully Account: "+ kid +" is created" );
+     }catch( SQLException e ) 
+        { 
+       
+          result.setStatus( ProvisioningResult.STATUS_FAILED );
+          result.addError( e );
+    	  }
+
+return result;
+  
+  </Source>
+</Rule>

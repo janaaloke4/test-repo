@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="SKY-email update rule" type="Correlation">
+  <Description>
+    Import template-defined Roles from a CSV file.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+  import sailpoint.object.*;
+  import java.util.*;
+  import sailpoint.api.Workflower;
+	import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+  Identity id= context.getObjectByName(Identity.class,"Alexander.Sullivan");
+
+  ProvisioningPlan plan=new ProvisioningPlan();
+  List accList= new ArrayList();
+  
+  
+  
+  List 	idLinks= id.getLinks();
+   //log.error("All APPs Name: "+idLinks);
+  for(Link l: idLinks)
+  {
+    AccountRequest accReq= new AccountRequest();
+    log.error("APP Name: "+l.getApplicationName());
+  	if("Claims Apps".equalsIgnoreCase(l.getApplicationName()))
+    {
+      log.error("...........................................Inside if ............................");
+    	//AttributeRequest atrReq= new AttributeRequest();
+      //accReq.setApplication(l.getApplicationName());
+      accReq.setApplication("Claims Apps");
+      accReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+     // accReq.setNativeIdentity(l.getNativeIdentity());
+      
+      accReq.add(new AttributeRequest("phone",ProvisioningPlan.Operation.Set, "1234567890"));
+    }
+    accList.add(accReq);
+    
+  }
+  plan.setIdentity(id);
+  plan.setAccountRequests(accList);
+   
+  log.error("My Plan................"+ plan.toXml());
+  HashMap launchArgsMap = new HashMap();
+  launchArgsMap.put("identityName", id.getName());
+
+  launchArgsMap.put("plan", plan);
+
+  //launchArgsMap.put("approvalScheme", "none");
+
+  WorkflowLaunch wflaunch = new WorkflowLaunch();
+ // Workflow wf = (Workflow) context.getObjectByName(Workflow.class, "SKY - Joiner initial phase");
+  Workflow wf = (Workflow) context.getObjectByName(Workflow.class, "Sky-Create AccessRequest Workflow");
+
+  wflaunch.setWorkflowName(wf.getName());
+
+  wflaunch.setWorkflowRef(wf.getName());
+
+  wflaunch.setVariables(launchArgsMap);
+
+  Workflower workflower = new Workflower(context);
+
+  try {
+
+    WorkflowLaunch launch = workflower.launch(wflaunch);
+
+    log.debug("workflow launched sucessfully " + launch);
+
+  } catch (GeneralException eGeneralException) {
+
+    log.error(eGeneralException);
+
+  }
+  log.error("End of rule................  SKY-email update rule ");
+
+
+  </Source>
+</Rule>

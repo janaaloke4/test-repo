@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="ClearPar" profileClass="spadmin" type="DelimitedFile">
+  <Attributes>
+    <Map>
+      <entry key="PassphraseForPrivateKey" value="1:ACP:/ceHi7thCZ+AGSq3+qssKfuoTunPRaF6x7osyN74+0Y="/>
+      <entry key="PrivateKeyFilePath"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1785140146880</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1785140136789</Date>
+        </value>
+      </entry>
+      <entry key="afterProvisioningRule"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="delimiter" value=","/>
+      <entry key="file" value="E:\payFlowUser.csv"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ftpsAuthMethod" value="password"/>
+      <entry key="ftpsClientCertificateFilePath"/>
+      <entry key="ftpsClientCertificatePassphrase"/>
+      <entry key="group.delimiter" value=","/>
+      <entry key="group.file" value="E:\payFlowUserAccess.csv"/>
+      <entry key="group.filetransport" value="local"/>
+      <entry key="group.filterEmptyRecords">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="group.isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="parseType" value="delimited"/>
+      <entry key="port"/>
+      <entry key="stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="this is clerpar app"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+      <entry key="transportUser" value="User1"/>
+      <entry key="transportUserPassword" value="1:ACP:RFMVfm1iZ34LJwlRofPAuoZbhp4K7v4HRJ+Is8dEvTM="/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="Sky-CorrelationRule-email"/>
+  </CorrelationRule>
+  <CustomizationRule>
+    <Reference class="sailpoint.object.Rule" name="customization rule - employeeCenter"/>
+  </CustomizationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Adam.Murphy"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="SKY-Create-ProvisioningPolicy-Form-Payflow" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="SKY-Create-ProvisioningPolicy-Form-Payflow"/>
+        </Map>
+      </Attributes>
+      <FormRef name="SKY-Create-ProvisioningPolicy-Form-Payflow"/>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="fullName" identityAttribute="email" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="firstName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="lastName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="fullName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="email" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="department" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" name="entitlement" schemaObjectType="group" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema aggregationType="group" descriptionAttribute="description" displayAttribute="entitlement" identityAttribute="entitlement" instanceAttribute="" nativeObjectType="" objectType="group" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="entitlement" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="description" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

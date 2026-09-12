@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="BankingMonday-APP" type="DelimitedFile">
+  <Attributes>
+    <Map>
+      <entry key="delimiter" value=","/>
+      <entry key="file" value="E:\payFlowUser.csv"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="ftpsAuthMethod" value="password"/>
+      <entry key="group.delimiter" value=","/>
+      <entry key="group.file" value="E:\payFlowUserAccess.csv"/>
+      <entry key="group.filetransport" value="local"/>
+      <entry key="group.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="parseType" value="Delimited"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="This is demo app created fro the rule utility"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+      <entry key="transportUser" value="User1"/>
+      <entry key="transportUserPassword" value="1:ACP:R9Hd2W+rhLUkPuLebIg1xERYc7Xs4GTt0Gjdd7j/5B8="/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="Sky-CorrelationRule-email"/>
+  </CorrelationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Adam.Murphy"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="SKY-Create-ProvisioningPolicy-Form-Payflow" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="SKY-Create-ProvisioningPolicy-Form-Payflow"/>
+        </Map>
+      </Attributes>
+      <FormRef name="SKY-Create-ProvisioningPolicy-Form-Payflow"/>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="fullName" identityAttribute="email" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="fullName" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+    </Schema>
+    <Schema aggregationType="group" descriptionAttribute="description" displayAttribute="entitlement" identityAttribute="entitlement" objectType="group">
+      <AttributeDefinition name="entitlement" type="string"/>
+      <AttributeDefinition name="description" type="string"/>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

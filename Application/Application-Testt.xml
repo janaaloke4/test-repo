@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="testt" profileClass="" type="DelimitedFile">
+  <Attributes>
+    <Map>
+      <entry key="PassphraseForPrivateKey" value="1:ACP:X7O8LuO4N9IPNdk3/ZaWW5d9mZUmZ4o15q6MDpejK4Y="/>
+      <entry key="PrivateKeyFilePath"/>
+      <entry key="afterProvisioningRule"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="delimiter" value=","/>
+      <entry key="file" value="E:\AuthContractors.csv"/>
+      <entry key="filetransport" value="sftp"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="ftpsAuthMethod" value="password"/>
+      <entry key="ftpsClientCertificateFilePath"/>
+      <entry key="ftpsClientCertificatePassphrase"/>
+      <entry key="group.filetransport" value="local"/>
+      <entry key="group.filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="group.partitionMode" value="auto"/>
+      <entry key="groupRole.columnNames"/>
+      <entry key="groupRole.commentCharacter"/>
+      <entry key="groupRole.delimiter" value=","/>
+      <entry key="groupRole.file" value="E:\AuthContractors_group.csv"/>
+      <entry key="groupRole.fileEncoding"/>
+      <entry key="groupRole.filterEmptyRecords">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="groupRole.filterString"/>
+      <entry key="groupRole.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="groupRole.indexColumn"/>
+      <entry key="groupRole.isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="groupRole.isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="groupRole.mergeColumns"/>
+      <entry key="groupRole.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="groupRole.numberOfLinesToSkip"/>
+      <entry key="groupRole.regularExpression"/>
+      <entry key="groupRole.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="host" value="demoHost"/>
+      <entry key="isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="parseType" value="delimited"/>
+      <entry key="partitionMode" value="auto"/>
+      <entry key="port" value="22"/>
+      <entry key="sftpAuthMethod" value="password"/>
+      <entry key="stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="huuu"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+      <entry key="transportUser" value="spadmin"/>
+      <entry key="transportUserPassword" value="1:ACP:qTPLDvBwn9ODebuqyZtINfDfFBo+JkGarqdf+IYtsf0="/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="" identityAttribute="" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None"/>
+    <Schema aggregationType="group" descriptionAttribute="" displayAttribute="" identityAttribute="" instanceAttribute="" nativeObjectType="" objectType="groupRole" permissionsRemediationModificationType="None"/>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

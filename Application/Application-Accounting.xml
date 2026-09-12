@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="Accounting" profileClass="" proxiedName="Accounting" type="DelimitedFile">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="multiplex"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Aloke.Jana"/>
+  </Owner>
+  <ProxyApplication>
+    <Reference class="sailpoint.object.Application" name="MyMultiplexAPP"/>
+  </ProxyApplication>
+  <Schemas>
+    <Schema displayAttribute="email" identityAttribute="employeeId" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="employeeId" type="string"/>
+      <AttributeDefinition name="firstName" type="string"/>
+      <AttributeDefinition name="lastName" type="string"/>
+      <AttributeDefinition name="fullName" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition name="department" type="string"/>
+      <AttributeDefinition name="Emp_type" type="string"/>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

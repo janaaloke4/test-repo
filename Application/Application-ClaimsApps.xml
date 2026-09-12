@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.JDBCConnector" featuresString="DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, DIRECT_PERMISSIONS, SEARCH, ENABLE, UNLOCK, ADDITIONAL_ACCOUNT_REQUEST, ACCOUNT_ONLY_REQUEST" icon="databaseIcon" name="Claims Apps" profileClass="spadmin" type="JDBC">
+  <Attributes>
+    <Map>
+      <entry key="SQL" value="SELECT accounts.kid,email,firstName,lastName,emp_no,acc_active,phone,acount_type,jobId,location,entitlement FROM accounts left join mygroups on accounts.kid= mygroups.kid order by accounts.kid;"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1725779648989</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1725779646445</Date>
+        </value>
+      </entry>
+      <entry key="afterProvisioningRule"/>
+      <entry key="aggregationMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="buildMapRule" value="sky-myClaimsApps_BuildMap"/>
+      <entry key="compositeDefinition"/>
+      <entry key="connMaxRetry" value="3"/>
+      <entry key="connRetryEnable">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="connWaitTimeForRetry" value="2"/>
+      <entry key="deltaTable"/>
+      <entry key="driverClass" value="com.mysql.cj.jdbc.Driver"/>
+      <entry key="getDeltaSQL"/>
+      <entry key="indexColumns">
+        <value>
+          <List>
+            <String>email</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="isPermissionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="jdbcCreateProvisioningRule" value="sky-myClaimsApps_Create_ProvisionRule"/>
+      <entry key="jdbcDisableProvisioningRule" value="sky-myClaimsApps_Disable_ProvisionRule"/>
+      <entry key="jdbcEnableProvisioningRule" value="sky-myClaimsApps_Enable_ProvisionRule"/>
+      <entry key="jdbcExceptionBucketing">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="jdbcModifyProvisioningRule" value="sky-myClaimsApps_Modify_ProvisionRule"/>
+      <entry key="mergeColumns">
+        <value>
+          <List>
+            <String>entitlement</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="noPermissions" value="false"/>
+      <entry key="operations" value="Create, Modify, Delete, Enable, Disable, Unlock"/>
+      <entry key="partitionMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="partitionStatements"/>
+      <entry key="password" value="1:ACP:BQig11jt8CZRZnyZsAaMNVm5172xI/e94fY1a/XYoVI="/>
+      <entry key="provisionRule" value="operationRule"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="my claims"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="JDBC Template"/>
+      <entry key="testConnSQL"/>
+      <entry key="url" value="jdbc:mysql://localhost/claims"/>
+      <entry key="useExecuteQuery">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="useStoredProcedureDelta">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="useStoredProcedureDirectPermission">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="useStoredProcedureGetObject">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="useStoredProcedurePartition">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="useStoredProcedureSqlStmt">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="useStoredProcedureTestConn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="user" value="claims"/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="sky-myClaimsApps_Correlation_Rule"/>
+  </CorrelationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Albert.Stewart"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="MyClaims_app-Create_form" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="MyClaims_app-Create_form"/>
+        </Map>
+      </Attributes>
+      <Description>Form to create account into My Claims application</Description>
+      <FormRef name="MyClaims_app-Create_form"/>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="kid" identityAttribute="kid" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="email" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="firstName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="lastName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="emp_no" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="acc_active" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="phone" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="acount_type" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="jobId" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="kid" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="location" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="entitlement" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

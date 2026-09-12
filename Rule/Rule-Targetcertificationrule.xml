@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="TargetCertificationRule" type="CertificationScheduleEntitySelector">
+  <Description>
+    This rule is optionally run to determine which entities to certify as part of a certification campaign. It can return either a Filter object or a list of identity names. If a Filter object is returned, that will be queries against Identity objects to find the identity names.
+  </Description>
+  <Signature returnType="Filter or List of Strings">
+    <Inputs>
+      <Argument name="definition">
+        <Description>
+          The sailpoint.object.CertificationDefinition that is being used to generate the certification campaign
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="Filter or List of Strings">
+        <Description>
+          If returning a Filter, that will be used to query for sailpoint.object.Identity names to include. If returning a list of strings, those should be the names of sailpoint.object.Identity objects to include.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    import sailpoint.object.*;
+  	import sailpoint.object.QueryOptions;
+  	import sailpoint.object.Filter;
+  	import java.util.*;
+  
+  	QueryOptions qo=new QueryOptions();
+  	qo.add(Filter.eq("manager.name","Jack.Sullivan")); // certification for employees under Jack.Sullivan
+    List ids=context.getObjects(Identity.class,qo);
+    
+  	List &lt;String&gt; ids_list=new ArrayList&lt; String&gt;();
+		for(Identity id: ids)
+    {
+    	ids_list.add(id.getName());
+    }
+  return ids_list;
+    </Source>
+</Rule>

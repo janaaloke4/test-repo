@@ -1,0 +1,836 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="AJ-ProvisioningRule" type="Correlation">
+  <Description>
+    Import template-defined Roles from a CSV file.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+ 
+ 
+  
+  // multiple apps plan
+  import sailpoint.object.*;
+  import java.util.*;
+  import sailpoint.object.Filter;
+  import sailpoint.object.QueryOptions;
+  import sailpoint.object.Schema;
+  import sailpoint.object.ProvisioningPlan;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+	import sailpoint.api.Provisioner;
+
+  ProvisioningPlan myPlan= new ProvisioningPlan();
+  List accReqList= new ArrayList();
+	Identity id=context.getObjectById(Identity.class,"Julian.Ewing");
+  
+  // Create Operation
+  /*
+  AccountRequest accReq= new AccountRequest();
+  //  accReq.setNativeIdentity(l.getNativeIdentity());
+    accReq.setOperation(AccountRequest.Operation.Create);
+    accReq.setApplication("Accounting");
+   
+   // accReq.add(new AttributeRequest("mail",sailpoint.object.ProvisioningPlan.Operation.Set,"aloke@skyview.com"));
+   
+
+      accReqList.add(accReq);
+  */
+  
+  
+  
+  //Modify Operation
+  
+  List IdenlinkList=id.getLinks();
+  for(Link l: IdenlinkList)
+  {
+    log.error("------------------------------   "+l.getApplicationName());
+
+   AccountRequest accReq= new AccountRequest();
+    accReq.setNativeIdentity(l.getNativeIdentity());
+    accReq.setOperation(AccountRequest.Operation.Modify);
+    accReq.setApplication(l.getApplicationName());
+    if("Accounting".equals(l.getApplicationName()))
+    {
+    accReq.add(new AttributeRequest("email",sailpoint.object.ProvisioningPlan.Operation.Set,"Julian.Ewing11@skyview.com"));
+     log.error("Inside IF"); 
+    }
+   /* else if("Claims Apps".equals(l.getApplicationName()))
+      accReq.add(new AttributeRequest("email",sailpoint.object.ProvisioningPlan.Operation.Set,"aloke@skyview.com"));
+     else
+      continue;
+    */
+      accReqList.add(accReq);
+  //log.error("##############################   "+l.getDisplayName()); 
+
+  }
+  
+  
+  myPlan.setIdentity(id);
+  myPlan.setAccountRequests(accReqList);
+
+  // Plan is ready now we need to provision this plan
+
+  Provisioner pr= new Provisioner(context);
+  pr.setOptimisticProvisioning(true);
+  try{
+
+  	pr.execute(myPlan);
+  }catch(Exception e)
+  {}  
+
+
+return myPlan.toXml();
+
+
+
+  
+
+
+  /*
+  import sailpoint.object.*;
+  import java.util.*;
+   System.out.println("Running rule on 30th nov  ..................... ");
+
+ // String appName="Sky - LDAP";
+  String appName="Claims Apps";
+  List roleRemoveList=new ArrayList();
+
+  	roleRemoveList.add("Read");
+    //roleRemoveList.add("");
+
+
+  Identity identity= context.getObject(Identity.class, "Alan.Thomas");
+  Application appObj = context.getObject(Application.class, appName);
+
+  List appBundleList= identity.getBundles(appObj);
+
+
+  System.out.println("Associated bundle list for application \""+ appName +"\" are : "+ appBundleList);
+
+  for(Bundle bundle: appBundleList)
+  {
+
+    List profileList = bundle.getProfiles();
+
+    for(Profile profile: profileList)
+    {
+
+   //  System.out.println("Profile contain: "+ profile.getValue());
+      for(Filter f: profile.getConstraints() )
+      {
+        for(String targetEnt: f.getValue() )
+        {
+      	System.out.println("value: "+ targetEnt );
+        }
+      }
+      if(appName.equals( (profile.getApplication()).getName()) &amp;&amp; roleRemoveList.contains(profile.getConstraints()) )
+      {
+      	System.out.println("111 "+(profile.getApplication()).getName());
+      }
+    }
+
+   // if(roleRemoveList.contains(object2))
+  }
+  */
+  /* List assignEnts = new ArrayList();
+  assignEnts.add("allll");
+ Application appObj = context.getObject(Application.class, "Sky - LDAP");
+  Link link=identity.getLink(appObj);
+
+ Schema appSchema = appObj.getSchema("account");
+  List entAttrNames = appSchema.getEntitlementAttributeNames();
+  for(String entAtt: entAttrNames)
+  {
+    if(link.getAttribute(entAtt)!=null)
+    {
+       assignEnts.addAll( link.getAttribute(entAtt));
+       System.out.println("assigned roles are:  "+ assignEnts);
+    }
+
+  }
+  */
+
+
+
+
+
+  /*
+  import sailpoint.object.*;
+        import sailpoint.object.ProvisioningPlan;
+        import sailpoint.object.ProvisioningPlan.ObjectRequest;
+        import sailpoint.object.ProvisioningPlan.ObjectOperation;
+        import sailpoint.object.ProvisioningPlan.AttributeRequest;
+        import java.util.*;
+        import sailpoint.api.Provisioner;
+
+  System.out.println("Entitlement creation has been started : ");
+  ProvisioningPlan plan =new ProvisioningPlan();
+		List acntReq= new ArrayList();
+  log.info("at line34");
+   ObjectRequest objReq = new ObjectRequest();   
+    System.out.println("at line36");
+            //objReq.setOperation(ProvisioningPlan.ObjectOperation.Create); //
+                objReq.setOp(ObjectOperation.Create);
+               System.out.println("at line38");
+            objReq.setApplication("Sky - LDAP");
+						objReq.setType("group");
+  					objReq.setNativeIdentity("cn=abc,ou=EmployeeCenteGroup,dc=skyview,dc=com");
+  System.out.println("at line 42");
+           // objReq.add(new AttributeRequest("value",ProvisioningPlan.Operation.Set,"cn=abc,ou=EmployeeCenteGroup,dc=skyview,dc=com"));
+            objReq.add(new AttributeRequest("objectClass",ProvisioningPlan.Operation.Set,"group"));
+            objReq.add(new AttributeRequest("displayName",ProvisioningPlan.Operation.Set,"abc"));
+               objReq.add(new AttributeRequest("objectType",ProvisioningPlan.Operation.Set,"Group"));
+
+
+
+			acntReq.add(objReq);
+  	if(acntReq!= null)
+		{
+            //plan.setIdentity(iden);
+            plan.setAccountRequests(acntReq);
+
+            Provisioner provisioner = new Provisioner(context);
+            provisioner.setOptimisticProvisioning(true);
+
+            try
+            {
+             // System.out.println("Before plan compile");
+               // provisioner.compile(plan); //Compile the plan into a project
+              System.out.println("Before plan execute");
+                provisioner.execute(plan); //Compile and execute a plan in one call.
+								System.out.println("My Joinner user plan : "+ plan.toXml());
+            }
+            catch(Exception e)
+            {
+
+            }
+		}
+  */
+
+  /* Create entitlement 
+  import sailpoint.object.*;
+  import java.util.*;
+  import sailpoint.object.QueryOptions;
+  import sailpoint.object.Filter;
+  import sailpoint.object.ManagedAttribute;
+  import sailpoint.object.Application;
+  import sailpoint.object.Identity;
+
+  String value="cn=test1,ou=EmployeeCenteGroup,dc=skyview,dc=com";
+  String application="Sky - LDAP";
+  String type="group";
+  String attribute="groups";
+  String displayName="test1";
+  String requestable="true";
+  String description="Testing entitlement creation rule";
+  String owner="ladpGroupOwner";
+
+  QueryOptions qo = new QueryOptions();
+
+   Filter entFilter = Filter.and(Filter.eq("value",value), Filter.eq("displayName",displayName),Filter.eq("application.name",application));
+ // Filter entFilter = Filter.eq("application.name","Sky - LDAP");
+  qo.add(entFilter);
+
+  List entList=context.getObjects(ManagedAttribute.class,qo);
+  System.out.println("############################################## List of ents: ################# "+ entList+ "  "+ entList.isEmpty());
+	if(entList.isEmpty() || entList==null)  
+  {
+  	// Create ManageAttribute
+    System.out.println("No such ManagedAttribute exist, Creating new one:");
+    ManagedAttribute newEnt =new ManagedAttribute();
+
+    newEnt.setValue(value);
+    newEnt.setApplication(context.getObjectByName(Application.class,application));
+    newEnt.setType(type);
+    newEnt.setAttribute(attribute);
+    newEnt.setDisplayName(displayName);
+    if(requestable.equalsIgnoreCase("true"))
+    	newEnt.setRequestable(true);
+    else
+      newEnt.setRequestable(false);
+    if(description!=null)
+    newEnt.addDescription("en_US", description);
+    newEnt.setOwner(context.getObjectByName(Identity.class,owner));
+
+    System.out.println("New entitlement created :  " + value);
+    context.saveObject(newEnt);
+    context.commitTransaction();
+     System.out.println("New entitlement created :  " + value);
+
+  }
+  else
+  {
+      System.out.println("ManagedAttribute exist,Skipping creation: "+ value);
+  }
+
+
+
+  */
+
+  // System.out.println(ids);
+
+
+  // Identity id2=context.getObjectByName(Identity.class,"Adam.Smith");
+  //Identity id3=context.getObjectByName(Identity.class,"Adam.Murph");
+
+  // System.out.println("scope"+ id2.getControlledScopes() ); // 
+
+  /*
+
+  import sailpoint.object.*;
+  import java.util.*;
+  import java.text.SimpleDateFormat;
+
+  System.out.println("starting test rule........................");
+  String dateInString ="7-Jun-2013";// "Fri Dec 20 23:59:59 IST 2024";
+  SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
+  Date date = formatter.parse(dateInString);
+
+  SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy",Locale.GERMANY);
+  String s = sf.format(date);
+
+  System.out.println("Date  :"+s);
+
+  */
+  /*Identity id2=context.getObjectByName(Identity.class,"Aloke.Jana");
+
+  List&lt;Identity&gt; kswg=id1.getWorkgroups(); 
+  List&lt;Identity&gt; alwg=id2.getWorkgroups(); 
+  System.out.println("Adam.Murphy wg: "+kswg);
+  System.out.println("alok wg: "+alwg);
+
+  if(kswg.equals(alwg))
+    System.out.println("matched )))))))))))))))))))))))))))))))");
+  else
+    System.out.println("Not Matched(((((((((((((((((((((((((((");
+    */
+
+
+
+
+
+
+
+
+
+
+
+
+  /*
+  import sailpoint.object.*;
+  import java.util.*;
+
+  List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+  list.add("Adam.Murphy,993253");
+  list.add("Adam.Smith,9937482");
+
+  for(String s: list)
+  {
+    String[] stringarray = s.split(",");
+    String name=stringarray[0];
+    String ph=stringarray[1];
+
+  	//Identity id=context.getObjectByName(Identity.class,s);
+    System.out.println("Name: "+ name + " Phone "+ph);
+
+  }
+  */
+  /*  // How to connect with db through rule
+        import java.sql.Connection;
+        import java.sql.PreparedStatement;
+        import java.sql.SQLException;
+        import java.sql.Statement;
+        import java.sql.ResultSet;
+
+      String kid="Ben.Brown@skyview.com";
+        Connection connection = context.getJdbcConnection();
+        PreparedStatement statemant=connection.prepareStatement("select * from claims.accounts where email=? and acount_type='primary'");
+        statemant.setString (1,kid);
+
+        ResultSet rs=statemant.executeQuery();
+        if(rs.next())
+        {
+        		System.out.println(" User primary kid: "+ kid+" is already exist in claims apps."+statemant.execute());
+        		//  We are not going to create a new primary kid of a user if it is already exist in claims database (accounts tables)
+        }
+  else
+    System.out.println(" not exist");
+
+    */
+  /*
+  import java.util.*;
+
+  		Date todayDate = new Date();
+     Date startDate = new Date();	
+  		Calendar cal = Calendar.getInstance();
+			cal.setTime(startDate);
+			cal.add(Calendar.DATE,-11);
+			Date todayWithOffset = cal.getTime();
+
+  		if(todayDate.before(todayWithOffset))
+      {
+
+  				System.out.println("yes future date");      
+      }
+			System.out.println("JoinerNotificationLogger: -14 notification date is - "+todayWithOffset.toString());	
+  */
+  /*
+  import sailpoint.object.*;
+  import java.util.*;
+  import sailpoint.object.QueryOptions;
+  import sailpoint.object.Filter;
+  import sailpoint.api.IdentityService;
+
+  QueryOptions qo = new QueryOptions();
+  Filter idenFilter = Filter.and(Filter.eq("manager.name","Don Turner"), Filter.ne("isActive","T"));
+  qo.add(idenFilter);
+
+  List ids=context.getObjects(Identity.class,qo);
+  List&lt;String&gt; list_idn = new ArrayList&lt;String&gt;();
+  for (Identity idn: ids)
+  {
+  	list_idn.add(idn.getName());
+  }
+
+  System.out.println(list_idn);
+
+  */
+
+  /*
+ 													  import sailpoint.object.*;
+                            import java.util.*;
+                            import sailpoint.object.QueryOptions;
+                            import sailpoint.object.Filter;
+                            import sailpoint.api.IdentityService;
+
+
+
+                           QueryOptions qo=new QueryOptions();
+  												Filter myids=Filter.or(Filter.eq("id","c0a82bc284c61b7c8184c72d578a01ed"),Filter.eq("id","c0a82bc284c61b7c8184c72d3b190095"));
+                          qo.add(myids);
+                             String deptAccount="";
+                    				  String deptIIQ="";
+                             List deptClaims=new ArrayList();
+                    					List list_idn= context.getObjects(Identity.class, qo);
+                            for(Identity idn: list_idn)
+                            {
+                   								 try{
+                                           deptIIQ= idn.getAttribute("phone").toString();
+                      								}catch(Exception e){}
+
+                               Application app = context.getObject(Application.class, "Timesheet App");
+                                     IdentityService ids = new IdentityService(context);
+                                     List claims_links = ids.getLinks(idn, app);
+                              String[] myDeptList={};
+                                     for(Link l : claims_links)
+                                      {     
+                      										try{
+                                           deptAccount= l.getAttribute("capability").toString();
+                                           deptAccount= deptAccount.substring(1, deptAccount.length() - 1);
+
+                                            //List$lt;String&gt; myDeptList = Arrays.asList(deptAccount.split(","));
+                                           // ArrayList$lt;String&gt; myDeptList = new ArrayList$lt;&gt;(Arrays.asList(deptAccount.split(","));
+                                             myDeptList=deptAccount.split(",[ ]*");
+
+                                            for(String mydpt: myDeptList)
+                                            {
+                                             // deptClaims.add( mydpt);
+                                            System.out.println("ent are: "+mydpt ); 
+                                            }
+                      										 }catch(Exception e){}
+
+                    								/*		if(deptAccount.equals(deptIIQ))
+                    											{
+
+                    											}
+                    										else
+                    											{ System.out.println("YES mismatched"); }
+
+                                          */
+
+
+  /*
+   import java.io.*; 
+   import java.util.*;
+   import sailpoint.object.*;
+   import sailpoint.object.QueryOptions;
+   import sailpoint.object.Filter;
+   import sailpoint.object.Filter.FilterCompiler;
+   List deptClaims=new ArrayList();
+  Identity idn=context.getObjectById(Identity.class,"c0a82bc284c61b7c8184c72d59990209");
+ //System.out.println(idn.getAttribute("phone"));
+   List link=idn.getLinks();
+      for (Link l:link)
+        {
+          if(l.getApplicationName().equals("claims apps"))
+             {
+                 //System.out.println(l.getDisplayName());
+                  deptClaims.add(l.getAttribute("phone"));									  
+
+             }
+
+        } 
+  System.out.println(deptClaims);
+
+  /*
+  QueryOptions qo = new QueryOptions();
+  List l=new ArrayList();
+  l.add("Di2856");
+  l.add("KS9991");
+  l.add("Ad6735");
+
+  List filterList =new ArrayList();
+
+  //Filter.or(Filter.eq("uniquID","Di2856"),Filter.eq("uniquID","KS9991"),Filter.eq("uniquID","Ad6735"));
+
+  String comma = "";
+   String filterString="Filter.or(";
+  for(String s: l)
+  {
+    filterList.add(Filter.eq("uniquID",s));
+    //filterString += comma +"Filter.eq(\"uniquID\","+"\""+ s +"\"" +")";
+     // comma = ",";
+  }
+  //filterString +=")";
+  // System.out.println(filterString);
+
+  // String ss="Filter.eq(\"uniquID\",\"Di2856\")";
+  // Filter filter = Filter.compileFilter(ss); 
+ // Object ff=(Object)ss;
+   qo.add(Filter.or(filterList));
+  //System.out.println(ss);
+
+
+  //qo.add(filterString);
+  List ids=context.getObjects(Identity.class,qo);
+
+  for(Identity iden: ids)
+    System.out.println(iden.getName());
+
+
+ /* 
+   myFilter1 ss="Filter.or(
+                           Filter.eq(\"uniquID\",\"Di2856\")
+                          ,Filter.eq(\"uniquID\",\"KS9991\")
+                          ,Filter.eq(\"uniquID\",\"Ad6735\")
+                           )";
+                       //=Filter.or();
+
+                      /*
+                          String comma = "";
+                          String filterString = attrName + ".containsAll({";
+                            for (String entValue : entitlements) {
+                               filterString += comma + "\"" + entValue + "\"";
+                               comma = ",";
+                            }
+                            filterString += "})";
+
+  /*
+   import sailpoint.object.*;
+                            import java.util.*;
+                            import sailpoint.object.QueryOptions;
+                            import sailpoint.object.Filter;
+
+                            QueryOptions qo = new QueryOptions();
+                            // Filter f1 =Filter.eq("links.NameAndEmp","Adam Murphy7003");
+                             Filter f2 =Filter.ne("employeeID","");
+
+                            //qo.addFilter(f1); 
+  													qo.addFilter(f2);
+                            List idn= context.getObjects(Identity.class, qo);
+
+
+                            if(idn != null)
+                            System.out.println("Id is: "+idn);
+  /*
+  import sailpoint.object.Identity;
+  import sailpoint.object.QueryOptions;
+  import sailpoint.object.Filter;
+  import java.util.*;
+  QueryOptions qo = new QueryOptions();
+  //qo.add(Filter.eq("managerStatus",true));
+  qo.add(Filter.eq("manager.name","Don Turner"));
+  List ids= context.getObjects(Identity.class,qo);
+  List reporteeList = new ArrayList();
+  for (Identity iden: ids)
+  {
+    reporteeList.add(iden.getName());
+
+  }
+  System.out.println(reporteeList);
+/*
+  import sailpoint.object.*;
+  import java.util.*;
+  import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+  //QueryOptions qo = new QueryOptions();
+  //qo.addFilter(Filter.eq("name",""));
+
+  QueryOptions qo = new QueryOptions();
+  Filter f1 =Filter.eq("links.displayName","adam.murphy2@neptune.corp");
+  //Filter f2 =Filter.eq("identity","adam.murphy2@neptune.corp")
+  qo.add(f1); //Filter.and(f2,f1)
+  List idn= context.getObjects(Identity.class, qo);
+  for(Identity i: idn)
+   System.out.println(i);
+ // List id = context.getObjects(Identity.class, qo);
+  /*List link= id.getLinks();
+  for(Link l: link)
+  {
+  	  System.out.println(l.getDisplayableName());
+
+  }
+  //adam.murphy2@neptune.corp
+
+
+
+  /*
+  import sailpoint.object.*;
+  import sailpoint.api.IdentityService;
+  import java.util.*;
+  import sailpoint.api.Provisioner;
+  import sailpoint.object.ProvisioningPlan.AccountRequest;
+  import sailpoint.object.ProvisioningPlan.AttributeRequest;
+
+  Identity iden = context.getObjectById(Identity.class, "c0a82bc284c61b7c8184c72d5a310211");
+  Application app = context.getObjectByName(Application.class, "claims apps");
+  IdentityService ids = new IdentityService(context);
+
+   ProvisioningPlan plan= new ProvisioningPlan();
+     AccountRequest accReq = new AccountRequest();
+
+
+
+
+  List links = ids.getLinks(iden, app);
+  List accountRequestList = new ArrayList();
+  for(Link l : links)
+  {
+    //appName.add(l.getNativeIdentity());
+
+    accReq.setNativeIdentity(l.getNativeIdentity());
+    accReq.setApplication("claims apps");
+    accReq.setOperation(AccountRequest.Operation.Modify);
+
+    accReq.add(new AttributeRequest("acc_active",ProvisioningPlan.Operation.Set,"false"));
+
+    accountRequestList.add(accReq);
+
+
+  }
+
+  plan.setAccountRequests(accountRequestList);
+  plan.setIdentity(iden);
+
+     try
+				{
+					//System.out.println("Provisioning required - EXECUTING");    
+	               	Provisioner provisioner= new Provisioner(context);
+					provisioner.setOptimisticProvisioning(true);
+		        	ProvisioningProject project =  provisioner.compile(plan);
+		            provisioner.execute(plan);
+	               	System.out.println(plan.toXml());     	  
+	                System.out.println("Provisioning FINISHED");
+
+                }catch (Exception e) 
+                {
+                	log.error(e.toString());
+                }
+
+
+  */
+
+  /*Date formate change
+  import sailpoint.object.*;
+  import java.util.*;
+  import java.text.SimpleDateFormat; 
+
+  Identity iden = context.getObjectById(Identity.class, "c0a82bc285141457818515e7386a0274");
+  Date date= iden.getCreated();
+  System.out.println("Created on :"+date); // output: Thu Dec 15 18:39:12 IST 2022
+  SimpleDateFormat DateFormat = new SimpleDateFormat("MM/dd/yyyy");
+  String newdate = DateFormat.format(date);
+  System.out.println("Created on :"+newdate);
+
+  //date formate change end
+  */ 
+  /*
+  import sailpoint.object.*;
+  import java.util.*;
+  import java.text.SimpleDateFormat;  
+  import java.time.*;
+  import sailpoint.api.IdentityService;
+  Identity iden = context.getObjectById(Identity.class, "c0a82bc285141457818515e7386a0274");
+
+//  Identity manager=iden.getManager();
+   //System.out.println("user name "+iden.getName());
+  //System.out.println("User email "+iden.getAttribute("startDate"));
+
+   Date endDate=new SimpleDateFormat("MM/dd/yyyy").parse(iden.getAttribute("endDate")); 
+  System.out.println("End date: "+endDate);
+
+  LocalDate localDate2 = LocalDate.now();  // current date 
+  Date TodayDate=new SimpleDateFormat("yyyy-MM-dd").parse(localDate2.toString()); 
+  System.out.println("Today date: "+localDate2 +"########### "+TodayDate);
+
+
+  //long days = Duration.between(TodayDate,endDate).toDays();
+  if(endDate.before(TodayDate)){
+  System.out.println("Date expired ");
+  }
+  else
+  {
+  System.out.println("End date in future date");
+  }
+
+  */
+  /*
+  	try{
+  Application app = context.getObjectByName(Application.class, "claims apps");
+
+                    		IdentityService ids = new IdentityService(context);
+
+    									 	List links = ids.getLinks(iden, app);
+                    }catch(Exception e) {System.out.println(e);}
+                    		if(!links.isEmpty())
+	   											{
+                    				for(Link l : links)
+                    					{
+
+
+                    							 //System.out.println(l.getCreated()); 
+
+
+                   					  }		
+                  			  }
+
+    */
+  /* 
+  import sailpoint.object.*;
+     import java.util.List;                
+  Bundle b = context.getObjectById(Bundle.class,"c0a82bc28beb14f1818beb8a8267003d");
+
+  String s=b.getDescription("en_US");
+  System.out.println(" "+s.replaceAll("\\s+"," ").trim());
+
+  */
+  /*
+  import sailpoint.object.*;
+  import java.util.List;
+  import sailpoint.api.IdentityService;
+  //TaskDefinition app = context.getObject(TaskDefinition.class,"c0a82bc286581ec581865905ef1507c1");
+  Identity identity = context.getObjectByName(Identity.class, "Casey Bridges");
+   //System.out.println("first name "+ identity.getName());
+
+  List action = new ArrayList();
+
+   Application app = context.getObjectByName(Application.class, "claims apps");
+      IdentityService ids = new IdentityService(context);
+     	List links = ids.getLinks(identity, app);
+
+
+     for(Link link : links){
+
+       System.out.println("application name "+ link.getDisplayName());
+        context.removeObject(link.getDisplayName());
+        context.commitTransaction();
+
+
+     }
+  */
+  /* 
+  // QueryOptions qo = new QueryOptions();
+  //qo.addFilter(Filter.eq("name",""));
+  List &lt;TaskResult&gt; task2 = context.getObjects(TaskResult.class); 
+
+  //System.out.println("task name - "+task.getName());
+
+  for(TaskResult ta : task2)
+{
+	System.out.println("task name - "+ta.getName());
+
+}
+*/
+
+  //System.out.println(task1);
+
+  /*
+  import sailpoint.object.Bundle;
+                        import sailpoint.object.QueryOptions;
+                        import sailpoint.object.Filter;
+                        import java.util.List;
+
+                        //List wrkgmemnberList = new ArrayList();
+                        QueryOptions qo = new QueryOptions();
+                        qo.addFilter(Filter.eq("type","organizational"));
+                        List&lt;Bundle&gt; workGroups = context.getObjects(Bundle.class,qo);
+  System.out.println(workGroups);
+  */
+  /*
+import sailpoint.object.*;
+import java.util.List;
+
+  Application appObj = null;
+  appObj = context.getObject(Application.class, "Accounting_user");
+  if (null != appObj) 
+  {
+    Schema appSchema = appObj.getSchema("account");
+	  if (null != appSchema) 
+    {
+	     List entAttrNames = appSchema.getEntitlementAttributeNames();
+
+      	System.out.println(entAttrNames.get(0));
+    }
+  }
+  */
+  /* filter with Identity + workgroup
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+import java.util.List;
+
+List wrkgmemnberList = new ArrayList();
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.eq("workgroup",Boolean.TRUE));
+List&lt;Identity&gt; workGroups = context.getObjects(Identity.class,qo);
+for(Identity ident : workGroups)
+{
+	System.out.println("Workgroup name - "+ident.getName());
+
+}
+
+*/
+  /* To get all application with filter
+import sailpoint.object.*; 
+import java.util.*;
+//import java.io.*;
+//import java.util.stream.Stream;
+
+  Filter filter = Filter.ne("id","");
+  QueryOptions qo = new QueryOptions();
+  qo.setCloneResults(true); 
+  qo.addFilter(filter);
+  List obj = context.getObjects(Application.class,qo); 
+  for (Application apps : obj) {
+
+  System.out.println(apps.getName());
+  }
+  */
+
+
+  </Source>
+</Rule>

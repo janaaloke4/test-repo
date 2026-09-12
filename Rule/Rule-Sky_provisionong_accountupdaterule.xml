@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="sky_Provisionong_AccountUpdateRule" type="Validation">
+  <Description>This rule is used to validate the Field values on a provisioning plan.</Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+         The log object associated with the SailPointContext.
+       </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+         A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+       </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+           The Identity object being provisioned.
+       </Description>
+      </Argument>
+      <Argument name="app">
+        <Description>
+           The Application object being processed.
+       </Description>
+      </Argument>
+      <Argument name="form">
+        <Description>
+           The Form object being processed.
+       </Description>
+      </Argument>
+      <Argument name="field">
+        <Description>
+           The Field object being validated.
+       </Description>
+      </Argument>
+      <Argument name="value">
+        <Description>
+           The Object representing the field value.
+       </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="value">
+        <Description>
+         An Object (possibly a Collection) of messages resulting from the
+         validation rule.
+       </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+  //import energy.uniper.idm.iiq.helper.passwordpolicy.PasswordPolicyHelper;
+    import java.util.*;
+    import sailpoint.object.Identity;
+    import sailpoint.object.Link;
+    import sailpoint.object.Attributes;
+    import sailpoint.object.ProvisioningPlan;
+    import sailpoint.object.ProvisioningPlan.AccountRequest;
+    import sailpoint.object.ProvisioningPlan.AttributeRequest;
+    import sailpoint.api.Provisioner;
+    import sailpoint.object.Custom;
+    import sailpoint.object.ProvisioningProject;
+    import sailpoint.object.Application;
+	
+	// Constants
+	//String SOURCE_APPLICATION_NAME="UD01 Active Directory";
+	String TARGET_APPLICATION_NAME="Claims Apps";
+	//String MAPPING_CONFIG_NAME="UPR_DSCU_SYNC_CONFIG_SECONDARY_KIDS";
+	//String ACCOUNT_TYPE = "primary";
+
+List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+  list.add("Adam.Murphy,993253");
+  list.add("David.Williams,9937482");
+  
+  for(String s: list)
+  {
+    
+		 String[] stringarray = s.split(",");
+    String name=stringarray[0].trim();
+    String phone=stringarray[1].trim();
+    Identity identity = context.getObjectByName(Identity.class,name);
+    
+    System.out.println("Reading mapping config object for Identity "+ name);
+	
+
+     //if(identity.getAttribute("upr_primary_kid") != null){
+     //	System.out.println("Identity has primary_kid ");
+
+     	List links = identity.getLinks();
+     	List linksToCheck = identity.getLinks();
+
+	   	if(!links.isEmpty())
+	   	{
+        
+			System.out.println("Creating provisioning plan");
+
+    	    ProvisioningPlan plan = new ProvisioningPlan();
+    	    plan.setIdentity(identity);
+    	    Boolean changesToProvision = true;
+        for (Link link : links) {
+          //System.out.println("Enter");
+          if("Claims Apps".equals(link.getApplicationName())) {
+            
+           // if("P".equals(link.getAttribute("accountType")))
+           // {
+            
+            AccountRequest accountRequest = new AccountRequest();
+                            accountRequest.setApplication(TARGET_APPLICATION_NAME);
+                            accountRequest.setOperation(AccountRequest.Operation.Modify);
+ 					 accountRequest.setOp(ProvisioningPlan.ObjectOperation.Modify);
+                                accountRequest.setNativeIdentity(link.getNativeIdentity());
+           //  accountRequest.add(new AttributeRequest("department", ProvisioningPlan.Operation.Set, identity.getAttribute("upr_department_number_short") ));
+          //accountRequest.add(new AttributeRequest("departmentNumber", ProvisioningPlan.Operation.Set, "HR Services CFO"));
+            accountRequest.add(new AttributeRequest("phone", ProvisioningPlan.Operation.Set, phone));
+            //accountRequest.add(new AttributeRequest("msExchHideFromAddressLists", ProvisioningPlan.Operation.Set, false));
+           //accountRequest.add(new AttributeRequest("accountType", ProvisioningPlan.Operation.Set, "P"));
+           
+        
+				plan.add(accountRequest);    
+       System.out.println("Inside plan......");
+            //}     
+          
+          }
+             
+       }
+             
+        if(changesToProvision)
+      		{
+				try
+				{
+					System.out.println("Provisioning required - EXECUTING");     
+	               	Provisioner provisioner= new Provisioner(context);
+					provisioner.setOptimisticProvisioning(true);
+		        	ProvisioningProject project =  provisioner.compile(plan);
+		            provisioner.execute(project);
+	               	System.out.println(plan.toXml());     	  
+	                System.out.println("Provisioning FINISHED"+ project);
+
+                }catch (Exception e) 
+                {
+                	//log.error(e.toString());
+                }
+          if(plan.isFullyCommitted()) //Return true if the plan was a complete success.
+            {
+              System.out.println("The plan was a complete success.");
+            }
+            else
+            {
+              System.out.println("Issue in provisioning the user into target system");
+            }
+			}else
+            {	                           	  
+            	System.out.println("Provisioning not required - SKIPPING");
+            }                  
+	} // end of 	if(!links.isEmpty())
+  
+  }
+  
+  
+     // }
+
+     return true;
+</Source>
+</Rule>
