@@ -1,22 +1,41 @@
-1) To clone remote files into our local machine/editor
+1) To convert any local repo/directory  into git repo
+ -> git init 
+2) To clone remote files into our local machine/editor
  -> git clone https://github.com/janaaloke4/test-repo.git
-2) in terminal inorder to move next folder we use below command 
+3) in terminal inorder to move next folder we use below command 
  -> cd <filename>
-3) To view all the available file inside the repo we use below command
+4) To view all the available file inside the repo we use below command
 -> ls
-4) To Check if there is/are any changes between our local repo and remote repo, 
+5) To Check if there is/are any changes between our local repo and remote repo, 
  -> git status
  ---- Type of git status --------------( File change cycle: Add new changes -> Add/stagging area -> commit ) 
 	1) Untracked :  new files that git doesnt yet track, ex: we created a new file in our local repo which not yet push into remote file
 	2) modified  :  This status appear when we made any new changes on the existing file, but not yet pushed into remote file
 	3) staged	 :  This appear when file is ready tobe committed ( Before commit)
 
-5) To move our changes into stagged state 
+6) To move our changes into stagged state 
  -> git add <fileName>  // Single file 
  -> git add .           // Add all changes at once
  
-6) Once we add our changes it is now ready to commit.
+7) Once we add our changes it is now ready to commit.
  -> git commit -m "<Add your commit message >"
  
-7) To upload local repo content into remote repo we have to push our chnages , then only it will visable in the remote side.
+8) To upload local repo content into remote repo we have to push our chnages , then only it will visable in the remote side.
  -> git push origin main
+ 
+ // Here 'origin' - meaning our remote repo name
+ // 'main' -  meaning our branch name, now if you want to puch changes on other branch the need to replace 'main' with that branch name.
+ ....................................... Branch ...............................................
+
+9) To check on which branch we are working
+ -> git branch
+10) To rename any branch 
+ -> git branch -M <New Name>
+11) To check on which remote repo we are currently working 
+ -> git remote -v
+12) To create a new branch 
+ -> git checkout -b <new branch name>
+13) To move one branch to another 
+-> git checkout <next branch name>
+14) To delete any branch. // note that, we cant delete branch, if we are on the same branch. ex, if we are in branch B1 then cant delete B1
+ -> git branch -d <name of that branch which you want to delete>
