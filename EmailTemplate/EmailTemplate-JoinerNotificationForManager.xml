@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate name="Joiner Notification for manager">
+  <Body>
+   
+    &lt;html&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;/meta&gt;
+&lt;/head&gt;
+&lt;body&gt;
+        &lt;br/&gt;
+    &lt;br/&gt;
+  &lt;img alt="skyviewlogo_small.png" src="E:\tomcat-90\webapps\skyview\ui\images\mylogo.png" width="260" height="87"/&gt;
+  &lt;br/&gt;
+    &lt;p&gt;&lt;b&gt;PLEASE DO NOT RESPOND TO THIS EMAIL&lt;/b&gt; - This is a system generated message.&lt;/p&gt;&lt;br/&gt;
+
+    #macro ( beginTable )
+      #set($rowCounter = 0)
+      &lt;table style="border-top: 1px solid #e5e5e5; border-right: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5; border-collapse: collapse;"&gt;
+    #end
+
+    #macro ( endTable )
+      &lt;/table&gt;
+    #end
+
+    #macro ( beginRow )
+      #if ($rowCounter % 2 == 0)
+        &lt;tr style="background-color: #f2f2f2;"&gt;
+      #else
+        &lt;tr&gt;
+      #end
+
+      #set($rowCounter = $rowCounter + 1)
+    #end
+
+    #macro ( endRow )
+        &lt;/tr&gt;
+    #end
+
+    #macro ( printHeader $child)
+      &lt;th
+        style="text-align: left; padding: 10px; font-weight: normal; background-color: #0078DC; color: white; border-bottom: 1px solid #0067be;"&gt;
+          $!child
+      &lt;/th&gt;
+    #end
+
+    #macro ( printCell $child)
+      &lt;td style="text-align: left; padding: 10px;"&gt;
+          $!child
+      &lt;/td&gt;
+    #end
+
+    #macro ( printEmployeeDataNew )
+      #beginTable()
+        #beginRow()
+          #printHeader("Name")
+    			#printHeader("Account Number")
+          #printHeader("Start Date")
+          #printHeader("Employee Type")
+          #printHeader("Employee ID")
+          #printHeader("Email address")
+
+        #endRow()
+        #beginRow()
+          #printCell( $userName )
+   			  #printCell( $account )
+          #printCell( $startDate )
+          #printCell( $empType )
+          #printCell( $emp_id )
+          #printCell( $userEmail )
+
+        #endRow()
+      #endTable()
+    #end
+
+    Dear Line Manager $manager,
+    &lt;br/&gt;
+    &lt;br/&gt;
+
+    Please be informed that new user has been onboarded into the system. The table below shows the new employee(s) joining your team, their start date(s) and
+    other details.
+
+    &lt;br/&gt;
+    &lt;br/&gt;
+    
+     #printEmployeeDataNew()
+    
+     &lt;br/&gt;
+    &lt;br/&gt;
+    
+    Kindly check the above details and in case of any changes are require please do contact with the IT Team at Team.it@skyview.com
+
+ &lt;br/&gt;
+    &lt;br/&gt;
+ 
+Yours sincerely,&lt;br/&gt;
+SkyView Team&lt;br/&gt;
+    
+    &lt;/body&gt;
+&lt;/html&gt;
+     &lt;br/&gt;
+    &lt;br/&gt;
+  </Body>
+  <Description>
+    This email template is used to notify the line manager that a new employee has been created in
+    the system.
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="userName" type="string">
+        <Description>Name of the new user</Description>
+      </Argument>
+      <Argument name="manager" type="WorkItem">
+        <Description>Manager of the new user.</Description>
+      </Argument>
+      <Argument name="startDate" type="Certification">
+        <Description>Joining date of the user</Description>
+      </Argument>
+      <Argument name="empType" type="string">
+        <Description>User type</Description>
+      </Argument>
+      <Argument name="emp_id" type="string">
+        <Description>The display id of the user</Description>
+      </Argument>
+      <Argument name="owner" type="string">
+        <Description>The display the owner who needs to certify.</Description>
+      </Argument>
+      <Argument name="userEmail" type="string">
+        <Description>Joinner email id .</Description>
+      </Argument>
+      <Argument name="account" type="string">
+        <Description>Account number.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Subject>Joiner notification - New employee has been onboarded</Subject>
+</EmailTemplate>

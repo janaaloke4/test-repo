@@ -1,0 +1,233 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="sky_create_role">
+  <Variable name="launcher"/>
+  <Variable name="owner"/>
+  <Variable name="name"/>
+  <Variable name="roleName"/>
+  <Variable name="roleDisplayName"/>
+  <Variable name="roleType"/>
+  <Variable name="description"/>
+  <Variable name="requestable"/>
+  <Variable name="entitlement"/>
+  <Variable name="approvalType"/>
+  <Variable name="addEntitlement"/>
+  <Variable name="appName"/>
+  <Variable name="isBusiness" type="boolean"/>
+  <Variable name="plan"/>
+  <Variable initializer="true" name="trace"/>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="choose role type"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="690" posY="10"/>
+  <Step icon="Approval" name="choose role type" posX="98" posY="10">
+    <Approval name="Select role type" owner="ref:launcher" return="roleType,isBusiness" send="launcher,roleType,isBusiness">
+      <Form name="Select role type">
+        <Attributes>
+          <Map>
+            <entry key="title" value="Create Role - Select role type"/>
+          </Map>
+        </Attributes>
+        <Section name="Information" type="text">
+          <Field name="Information" type="string">
+            <Script>
+              <Source>
+                  //String msg = "You are entering Role Managing interface. Please be informed that all your changes are immediately reflected in the application under Role."; 
+
+               // String msg ="&lt;p style='color:red;&gt; Hiii &lt;p&gt;";
+                String msg = "&lt;ul&gt; &lt;li&gt;&lt;font color='red' b&gt;  123 You are entering Entitlement Managing interface.&lt;/b&gt;   &lt;li&gt;  &lt;font color='red' b&gt; Please be informed that all your changes are immediately reflected in the application.&lt;/b&gt; ";
+				          return msg;
+                </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Section name="Section 1">
+          <Field displayName="Role Type" name="roleType" required="true" type="string">
+            <AllowedValues>
+              <String>business</String>
+              <String>it</String>
+            </AllowedValues>
+            <Script>
+              <Source>
+                
+             
+                  if (roleType != null) {
+                    return roleType;
+                  }
+                </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Button action="next" label="Select"/>
+        <Button action="cancel" label="Cancel"/>
+      </Form>
+    </Approval>
+    <Transition to="Fillup role details"/>
+  </Step>
+  <Step icon="Approval" name="Fillup role details" posX="198" posY="10">
+    <Approval name="Enter role details" owner="ref:launcher" return="roleType,roleName,roleDisplayName,owner,description,isBusiness,appName,entitlement" send="launcher,roleType,roleName,roleDisplayName,owner,description,isBusiness,appName,entitlement">
+      <Form name="Enter role details">
+        <Attributes>
+          <Map>
+            <entry key="title" value="Create Role - Fillup all required details for role"/>
+          </Map>
+        </Attributes>
+        <Section name="Section 22">
+          <Field displayName="Name" filterString="roleType==it" name="roleName" required="true" type="string">
+            <Script>
+              <Source>
+                if (roleName != null) {
+                    return roleName;
+                  }
+			  
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Display Name" filterString="roleType==it" name="roleDisplayName" required="true" type="string">
+            <Script>
+              <Source>
+                if (roleDisplayName != null) {
+                    return roleDisplayName;
+                  }
+               
+			  
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Type" name="roleType" type="string">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="script:return true;"/>
+              </Map>
+            </Attributes>
+            <Script>
+              <Source>
+               
+                
+                
+                if (roleType != null) {
+                    return roleType;
+                  }
+               
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Business owner" name="owner" type="sailpoint.object.Identity">
+            <Attributes>
+              <Map>
+                <entry key="hidden">
+                  <value>
+                    <Script>
+                      <Source>
+                     
+                        import sailpoint.object.Identity;
+                        import sailpoint.object.QueryOptions;
+                        import sailpoint.object.Filter;
+                        import java.util.List;
+
+                        List wrkgmemnberList = new ArrayList();
+                        QueryOptions qo = new QueryOptions();
+                        qo.addFilter(Filter.eq("workgroup",Boolean.TRUE));
+                        List&lt;Identity&gt; workGroups = context.getObjects(Identity.class,qo);
+                       
+
+                          return false;
+                        </Source>
+                    </Script>
+                  </value>
+                </entry>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field displayName="Description" name="description" type="string">
+            <Script>
+              <Source>
+                 
+                if (description != null) {
+                    return description;
+                  }
+			  
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Application Name" name="appName" postBack="true" required="true" type="sailpoint.object.Application">
+            <Attributes>
+              <Map>
+                <entry key="hidden">
+                  <value>
+                    <Script>
+                      <Source>
+                      if( "it".equals(roleType))
+                					{
+                       
+                  					 return false;
+               					  }
+                         else
+                          {
+                        
+                             return true;
+                          }
+                       if (description != null) {
+                    return description;
+                  }
+                        </Source>
+                    </Script>
+                  </value>
+                </entry>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field displayName="Target entitlement" name="entitlement" required="true" type="managedattribute">
+            <Attributes>
+              <Map>
+                <entry key="hidden">
+                  <value>
+                    <Script>
+                      <Source>
+                        import sailpoint.object.ManagedAttribute;
+                        import sailpoint.object.Filter;
+                        import sailpoint.tools.Util;
+                        import sailpoint.object.Identity;
+                         
+                        
+                          if( "it".equals(roleType))
+                					{
+                       
+                  					 return false;
+               					  }
+                         else
+                          {
+                        
+                             return true;
+                          }
+                        </Source>
+                    </Script>
+                  </value>
+                </entry>
+              </Map>
+            </Attributes>
+          </Field>
+        </Section>
+        <Button action="next" label="Select"/>
+        <Button action="cancel" label="Cancel"/>
+      </Form>
+    </Approval>
+    <Transition to="Status"/>
+  </Step>
+  <Step icon="Task" name="Status" posX="612" posY="10">
+    <Approval name="Operation Status" owner="ref:launcher" return="" send="launcher">
+      <Form name="Operation Status">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Operation Status"/>
+          </Map>
+        </Attributes>
+        <Section label="Information" name="Information" type="text">
+          <Field name="Operation status" type="string" value="Operation SUCCESS"/>
+        </Section>
+        <Button action="next" label="Close"/>
+      </Form>
+    </Approval>
+    <Transition to="Stop"/>
+  </Step>
+</Workflow>

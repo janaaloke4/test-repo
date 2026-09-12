@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="test form" type="Workflow">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="test form"/>
+    </Map>
+  </Attributes>
+  <Description/>
+  <Section name="Section 1">
+    <Field name="msg" type="string">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="form_rule"/>
+      </RuleRef>
+    </Field>
+  </Section>
+</Form>

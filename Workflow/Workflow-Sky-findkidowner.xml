@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="sky-FindKidOwner">
+  <Variable initializer="true" name="trace"/>
+  <Variable name="accountName"/>
+  <Variable name="launcher"/>
+  <Variable name="ownerNme"/>
+  <Variable name="name"/>
+  <Variable name="manager"/>
+  <Variable name="inputName"/>
+  <Variable name="description"/>
+  <Variable name="requestable"/>
+  <Variable name="entitlement"/>
+  <Variable name="scope"/>
+  <Variable name="org"/>
+  <Variable name="plan"/>
+  <Description>Find the account owner details.</Description>
+  <Step icon="Start" name="Start" posX="6" posY="42">
+    <Transition to="Account Name"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="638" posY="35"/>
+  <Step icon="Analysis" name="Account Name" posX="201" posY="26">
+    <Approval name="Find account owner" owner="ref:launcher" return="accountName">
+      <Form name="Find account owner">
+        <Attributes>
+          <Map>
+            <entry key="hideIncompleteFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="includeHiddenFields">
+              <value>
+                <Boolean/>
+              </value>
+            </entry>
+            <entry key="pageTitle" value="Find account owner"/>
+          </Map>
+        </Attributes>
+        <Section name="Information">
+          <Field displayName="Please provide KID" name="accountName" required="true" type="string"/>
+        </Section>
+        <Button action="next" label="Find Owner"/>
+        <Button action="cancel" label="Cancel"/>
+      </Form>
+    </Approval>
+    <Transition to="Search Owner"/>
+  </Step>
+  <Step icon="Audit" name="Search Owner" posX="382" posY="117" resultVariable="ownerName">
+    <Script>
+      <Source>
+              import sailpoint.object.*;
+              import java.util.*;
+              import sailpoint.object.QueryOptions;
+            	import sailpoint.object.Filter;
+              
+        			log.error("Account name in input is: "+accountName);
+              QueryOptions qo = new QueryOptions();
+              Filter f1 =Filter.eq("links.displayName",accountName);
+              
+              qo.add(f1); 
+              List idn= context.getObjects(Identity.class, qo);
+       		    String name1="";
+        			
+        			if(idn != null &amp;&amp; idn.size()==1)
+								{
+                  for(Identity id: idn)
+                  {
+                 // System.out.println("#From Search Owner :"+ id.getName());
+                   name1= id.getName();
+                  //System.out.println("#From Search Owner :"+ name1);
+                  }	
+                  return name1;
+       				 }
+             if(idn != null &amp;&amp; idn.size()&gt;1)
+        				return "manyOwner";
+           return "NoUserFound";
+             
+        </Source>
+    </Script>
+    <Transition to="Owner Name"/>
+  </Step>
+  <Step icon="Analysis" name="Owner Name" posX="400" posY="150">
+    <Approval name="Find owner Name" owner="ref:launcher" send="ownerName">
+      <Form name="Find account owner Details">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Find account owner"/>
+          </Map>
+        </Attributes>
+        <Section name="Information">
+          <Field displayName="Account Owner Details" name="owner" type="string">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="script:return true;"/>
+              </Map>
+            </Attributes>
+            <Script>
+              <Source>
+                //
+                //System.out.println("############################################ :"+ ownerName);
+                if(ownerName.equals("NoUserFound"))
+                return "No Owner Found";
+                if(ownerName.equals("manyOwner"))
+                return "Multiple Owner Found";
+                
+			          return ownerName;
+                </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Button action="next" label="Close"/>
+      </Form>
+    </Approval>
+    <Transition to="Stop"/>
+  </Step>
+</Workflow>

@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="sky_LicenseRequest" type="LCMIdentity">
+  <Variable initializer="true" name="trace"/>
+  <Variable name="launcher"/>
+  <Variable name="selectedLicense"/>
+  <Variable name="selectedReportee"/>
+  <Variable input="true" name="quickLinkIdentityId"/>
+  <Variable input="true" name="quickLinkIdentityIds"/>
+  <Description>Request License</Description>
+  <Step icon="Start" name="Start" posX="32" posY="74">
+    <Transition to="Reportee Details"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="915" posY="83"/>
+  <Step icon="Audit" name="Reportee Details" posX="284" posY="36">
+    <Approval name="Reportee Details form" owner="ref:launcher" return="selectedReportee" send="launcher">
+      <Form name="Reportee Details form">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Reportee Details form"/>
+          </Map>
+        </Attributes>
+        <Description>Reportee Details form</Description>
+        <Section name="Information">
+          <Field name="Info" type="string">
+            <Script>
+              <Source>String msg="Please select the user from here to perform lock operation. Please be informed that this process will make the user inactive in the system also it will disable all the accounts";
+
+                       System.out.println("we are in the first form");
+                       return msg;
+              </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Section name="Select the user">
+          <Field helpKey="Select or search the user here" name="Select Identity" required="true" type="string">
+            <Script>
+              <Source>
+                
+                     import sailpoint.object.Identity;
+								/*
+                     Identity id = context.getObjectById(Identity.class, quickLinkIdentityId);
+                     if(id!=null){
+                     return id.getName();
+                     }
+                else */
+                return "spadmin";
+                  
+                </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Button action="cancel" label="Cancel"/>
+        <Button action="next" label="Next"/>
+      </Form>
+    </Approval>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Approval" name="Select License" posX="436" posY="151"/>
+  <Step icon="Provision" name="License Provision" posX="566" posY="33"/>
+  <Step icon="Task" name="Audit" posX="715" posY="155"/>
+</Workflow>

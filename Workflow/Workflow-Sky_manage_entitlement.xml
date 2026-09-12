@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="sky_manage_entitlement">
+  <Variable name="launcher"/>
+  <Variable name="owner"/>
+  <Variable name="name"/>
+  <Variable name="manager"/>
+  <Variable name="inputName"/>
+  <Variable name="description"/>
+  <Variable name="requestable"/>
+  <Variable name="entitlement"/>
+  <Variable name="scope"/>
+  <Variable name="org"/>
+  <Variable name="plan"/>
+  <Variable initializer="true" name="trace"/>
+  <Variable name="sessionOwner"/>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Select application"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="690" posY="10"/>
+  <Step icon="Approval" name="Select application" posX="98" posY="10">
+    <Approval name="Manage Entitlement - Select application" owner="ref:launcher" return="entitlement" send="launcher">
+      <Form name="Manage Entitlement - Select application">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Manage Entitlement - Select application"/>
+            <entry key="title" value="Manage Entitlement - Select entitlement"/>
+          </Map>
+        </Attributes>
+        <Section name="Information" type="text">
+          <Field name="Information" type="string" value="&lt;font color='red' b&gt;123 You are entering Entitlement Managing interface. Please be informed that all your changes are immediately reflected in the application. &lt;/b&gt;">
+            <Attributes>
+              <Map>
+                <entry key="contentIsEscaped" value="true"/>
+              </Map>
+            </Attributes>
+            <Script>
+              <Source>
+                  String msg = "&lt;font color='red' b&gt;You are entering Entitlement Managing interface. Please be informed that all your changes are immediately reflected in the application. &lt;/b&gt;";
+
+                  //String link = "&lt;a href=\"https://ping.uniper.energy/workspaces/identity-access-management/apps/wiki/identity-access-management-wiki/list/view/26ca8fbe-1875-461d-b1dc-610566de140e?currentLanguage=EN\" target=\"_blank\"&gt;MyIdentity Wiki&lt;/a&gt;.";
+
+                  //return msg + link;
+				  //return msg;
+                </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Section name="Section 1">
+          <Field displayName="Target entitlement" name="entitlement" required="true" type="managedattribute">
+            <Attributes>
+              <Map>
+                <entry key="hidden">
+                  <value>
+                    <Script>
+                      <Source>
+                        import sailpoint.object.ManagedAttribute;
+                        import sailpoint.object.Filter;
+                       // import sailpoint.tools.Util;
+                        import sailpoint.object.Identity;
+                          Identity lId = context.getObjectByName(Identity.class, launcher);
+
+
+                          //if (!Util.isNullOrEmpty(applicationName)) {
+                            //Filter filter = Filter.and(Filter.eq("businessApp", applicationName));
+                            //field.setFilterString(filter.getExpression(true));
+                         // }
+                          return false;
+                        </Source>
+                    </Script>
+                  </value>
+                </entry>
+              </Map>
+            </Attributes>
+          </Field>
+        </Section>
+        <Button action="next" label="Select"/>
+        <Button action="cancel" label="Cancel"/>
+      </Form>
+    </Approval>
+    <Transition to="Entitlement details"/>
+  </Step>
+  <Step icon="Approval" name="Entitlement details" posX="272" posY="10">
+    <Approval name="Manage Entitlement - Provide details" owner="ref:launcher" return="entitlement,description,owner,requestable" send="entitlement,connector,launcher,owner">
+      <Form name="Manage Entitlement - Provide details">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Manage Entitlement - Provide details"/>
+          </Map>
+        </Attributes>
+        <Section name="Section 01">
+          <Field displayName="Name" name="inputName" type="string">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="script:return true;"/>
+              </Map>
+            </Attributes>
+            <Script>
+              <Source>
+                import sailpoint.object.ManagedAttribute;
+                import sailpoint.tools.Util;
+
+                  if (!Util.isNullOrEmpty(entitlement)) {
+                    ManagedAttribute ent = context.getObjectById(ManagedAttribute.class, entitlement);
+                    return ent.getDisplayName();
+                  }
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Description" name="description" type="string">
+            <Script>
+              <Source>
+                import sailpoint.object.ManagedAttribute;
+                import sailpoint.tools.Util;
+
+                  if (!Util.isNullOrEmpty(entitlement)) {
+                    ManagedAttribute ent = context.getObjectById(ManagedAttribute.class, entitlement);
+                    return ent.getDescription("en_US");
+                  }
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Business owner" filterString="isActive==A" name="owner" type="sailpoint.object.Identity">
+            <Attributes>
+              <Map>
+                <entry key="hidden">
+                  <value>
+                    <Script>
+                      <Source>
+                        import sailpoint.object.Identity;
+                        import sailpoint.object.Filter;
+
+                          Filter filter = Filter.or(Filter.eq("name", launcher), Filter.and(Filter.eq("correlated", true), Filter.eq("inactive", false), Filter.notnull("firstname")));
+                          field.setFilterString(filter.getExpression(true));
+
+                          return false;
+                        </Source>
+                    </Script>
+                  </value>
+                </entry>
+              </Map>
+            </Attributes>
+            <Script>
+              <Source>
+                import sailpoint.object.ManagedAttribute;
+                import sailpoint.tools.Util;
+
+                  if (!Util.isNullOrEmpty(entitlement)) {
+                    ManagedAttribute ent = context.getObjectById(ManagedAttribute.class, entitlement);
+
+                    if (ent.getOwner() != null) {
+                      return ent.getOwner().getId();
+                    }
+                  }
+                </Source>
+            </Script>
+          </Field>
+          <Field displayName="Requestable" name="requestable" postBack="true" type="boolean">
+            <Script>
+              <Source>
+                import sailpoint.object.ManagedAttribute;
+                import sailpoint.tools.Util;
+
+                  if (!Util.isNullOrEmpty(entitlement)) {
+                    ManagedAttribute ent = context.getObjectById(ManagedAttribute.class, entitlement);
+
+             
+                    return ent.isRequestable();
+                
+                  }
+                </Source>
+            </Script>
+          </Field>
+        </Section>
+        <Button action="next" label="Submit Changes"/>
+        <Button action="cancel" label="Cancel"/>
+      </Form>
+    </Approval>
+    <Transition to="Provision Changes"/>
+  </Step>
+  <Step icon="Task" name="Provision Changes" posX="446" posY="10">
+    <Script>
+      <Source>
+        import sailpoint.object.ManagedAttribute;
+        import sailpoint.object.Identity;
+
+          ManagedAttribute ent = context.getObjectById(ManagedAttribute.class, entitlement);
+         
+          ent.addDescription("en_US", description);
+       // System.out.println(".................................fffff.............................."+requestable);
+          ent.setRequestable(requestable);
+          
+         
+          ent.setOwner(context.getObjectById(Identity.class, owner));
+
+
+          context.startTransaction();
+          context.saveObject(ent);
+          context.commitTransaction();
+        </Source>
+    </Script>
+    <Transition to="Status"/>
+  </Step>
+  <Step icon="Task" name="Status" posX="612" posY="10">
+    <Approval name="Operation Status" owner="ref:launcher" return="" send="launcher">
+      <Form name="Operation Status">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Operation Status"/>
+          </Map>
+        </Attributes>
+        <Section label="Information" name="Information" type="text">
+          <Field name="Operation status" type="string" value="Operation SUCCESS"/>
+        </Section>
+        <Button action="next" label="Close"/>
+      </Form>
+    </Approval>
+    <Transition to="Stop"/>
+  </Step>
+</Workflow>
